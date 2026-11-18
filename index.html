@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>브레인라이팅</title>
+<style>
+:root{--bg:#f3f1f4;--card:#fff;--ink:#2d2a32;--mute:#8e8996;--line:#e3dfe8;--p:#9d88b8;--pd:#76628f;--pk:#ecc9d8;--pl:#efe8f4}
+*{box-sizing:border-box;margin:0}
+body{font-family:'Pretendard',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;line-height:1.5}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:var(--card);border-bottom:2px solid var(--line);position:sticky;top:0;z-index:5}
+.logo{font-weight:800;font-size:18px;display:flex;gap:8px;align-items:center}.logo i{width:18px;height:18px;background:var(--p);border-radius:5px;display:inline-block;box-shadow:6px 6px 0 var(--pk)}
+main{max-width:760px;margin:0 auto;padding:18px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+h2{font-size:20px;margin-bottom:10px}h3{font-size:15px;margin:4px 0 8px}
+button{font:inherit;cursor:pointer;border:2px solid var(--ink);background:var(--card);color:var(--ink);padding:9px 14px;border-radius:12px;font-weight:700}
+button.pri{background:var(--p);border-color:var(--pd);color:#fff}button.pk{background:var(--pk);border-color:#c79ab0}
+button.ghost{border-color:var(--line);color:var(--mute)}button:active{transform:translateY(1px)}
+input,textarea,select{font:inherit;width:100%;padding:10px 12px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);margin-bottom:8px}
+input:focus,textarea:focus{outline:none;border-color:var(--p)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>*{flex:1}.row.nf>*{flex:none}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:12px}.big button{padding:26px 10px;font-size:17px}
+.code{font-size:34px;letter-spacing:6px;font-weight:800;color:var(--pd);text-align:center;background:var(--pl);border-radius:14px;padding:10px}
+.chip{display:inline-block;background:var(--pl);color:var(--pd);border-radius:20px;padding:5px 12px;margin:3px;font-weight:700;font-size:14px}
+.mute{color:var(--mute);font-size:14px}.err{color:#b4506f;font-size:14px;min-height:20px}
+.timer{font-size:40px;font-weight:800;color:var(--pd);text-align:center}
+.bar{height:8px;background:var(--line);border-radius:8px;overflow:hidden}.bar b{display:block;height:100%;background:var(--p)}
+.prev{background:var(--pl);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:14px}.prev u{text-decoration:none;font-weight:700;color:var(--pd)}
+.tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;border-color:var(--line)}.tabs .on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.hist{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:2px solid var(--line);cursor:pointer}
+#cv{width:100%;aspect-ratio:16/10;background:#fff;border:2px solid var(--line);border-radius:14px;touch-action:none;display:block}
+.pal{display:flex;gap:8px;margin:8px 0;align-items:center}.pal span{width:28px;height:28px;border-radius:50%;border:3px solid var(--line);cursor:pointer}
+.chat{height:300px;overflow:auto;background:var(--pl);border-radius:12px;padding:10px;margin-bottom:8px}.chat p{margin-bottom:6px;font-size:15px}
+.modal{position:fixed;inset:0;background:#2d2a3299;display:flex;align-items:center;justify-content:center;padding:18px;z-index:9}.modal .card{max-width:480px;max-height:85vh;overflow:auto;margin:0}
+.modal li{margin:0 0 8px 18px;font-size:15px}
+@media(max-width:520px){.big{grid-template-columns:1fr}.timer{font-size:34px}.code{font-size:28px}}
+</style></head><body>
+<header><div class="logo"><i></i>브레인라이팅</div><div class="row nf"><button class="ghost" id="more">더보기</button><button class="ghost" id="out" style="display:none">로그아웃</button></div></header>
+<main id="main"></main>
+<script>setTimeout(function(){var m=document.getElementById('main');if(!m.innerHTML.trim())m.innerHTML='<div class=card><h2>화면이 안 뜨네?</h2><p>파일을 더블클릭해서 열면 Firebase가 막혀서 안 돌아갈 수 있어. 버셀에 올린 주소(또는 로컬 서버)로 열어줘. 그리고 인터넷 연결이랑 firebaseConfig 값도 확인!</p></div>'},2500)</script>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,updateProfile} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {getFirestore,doc,getDoc,setDoc,updateDoc,addDoc,deleteDoc,collection,query,where,orderBy,onSnapshot,getDocs,arrayUnion} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+// ▼▼ Firebase 콘솔 > 프로젝트 설정 > 내 앱(웹)의 설정값으로 교체 ▼▼
+const firebaseConfig={apiKey:"YOUR_API_KEY",authDomain:"YOUR_PROJECT.firebaseapp.com",projectId:"YOUR_PROJECT",appId:"YOUR_APP_ID"};
+// ▲▲▲
+
+const app0=initializeApp(firebaseConfig),auth=getAuth(app0),db=getFirestore(app0);
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const e=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let U=null,code=null,R=null,ideas=[],chats=[],strokes=[],unsubs=[],viewKey='',tab='ideas',timerI=null,curWrite=null,hist=[],fired={},saveT=null,color='#76628f';
+const page=h=>{$('#main').innerHTML=h};
+const rref=()=>doc(db,'rooms',code);
+const nm=(n)=>R.settings.anon?'익명':n;
+
+/* ---------- 더보기(설명) ---------- */
+$('#more').onclick=()=>{const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class=card><h2>이 서비스는?</h2><p class=mute>종이 돌려쓰기 방식(브레인라이팅)으로 말없이 아이디어를 쌓고, 마지막에 토론하는 서비스예요.</p><br><ol><li>방장이 방을 만들고 코드를 공유해요.</li><li>1단계: 각자 정해진 시간 동안 아이디어를 적어요. 대화 금지!</li><li>2단계: 시간이 끝나면 내 시트가 옆 사람에게 넘어가요.</li><li>3단계: 받은 시트를 읽고 보완·발전시킨 새 아이디어를 적어요.</li><li>4단계: 정해진 횟수만큼 반복해요.</li><li>마지막: 화이트보드와 채팅으로 토론해요. 모든 기록은 방에 남고 txt로 저장할 수 있어요.</li></ol><br><button class=pri id=x style="width:100%">닫기</button></div>`;document.body.append(m);m.onclick=ev=>{if(ev.target===m||ev.target.id==='x')m.remove()}};
+$('#out').onclick=()=>signOut(auth);
+const showErr=m=>{if(!$('#main').innerHTML.trim()||$('#main').dataset.err)$('#main').dataset.err=1,$('#main').innerHTML=`<div class=card><h2>앗, 오류가 났어</h2><p class=err style="white-space:pre-wrap">${e(m)}</p></div>`};
+window.addEventListener('error',x=>showErr(x.message));window.addEventListener('unhandledrejection',x=>showErr(x.reason?.message||x.reason));
+setTimeout(()=>{if(!U&&!code)authView()},0);
+
+/* ---------- 인증 ---------- */
+onAuthStateChanged(auth,async u=>{U=u;$('#out').style.display=u?'':'none';if(u)await loadHist();view()});
+function view(){if(!U)return authView();if(!code)return home();roomRender()}
+function authView(){let mode='in';const draw=()=>{page(`<div class=card><h2>${mode==='in'?'로그인':'회원가입'}</h2>${mode==='up'?'<input id=nm placeholder="이름(방에 표시돼요)">':''}<input id=em type=email placeholder="이메일"><input id=pw type=password placeholder="비밀번호(6자 이상)">${firebaseConfig.apiKey.startsWith('YOUR')?'<div class=prev>firebaseConfig를 아직 안 바꿨어! index.html 위쪽 설정값을 Firebase 콘솔 값으로 교체해줘.</div>':''}<div class=err id=er></div><button class=pri id=go style="width:100%">${mode==='in'?'로그인':'가입하기'}</button><p class=mute style="margin-top:12px;text-align:center"><a href=# id=sw style="color:var(--pd)">${mode==='in'?'처음이라면 회원가입':'이미 계정이 있어요'}</a></p></div>`);
+$('#sw').onclick=ev=>{ev.preventDefault();mode=mode==='in'?'up':'in';draw()};
+$('#go').onclick=async()=>{try{if(mode==='in')await signInWithEmailAndPassword(auth,$('#em').value,$('#pw').value);else{const n=$('#nm').value.trim();if(!n)throw{message:'이름을 입력해줘'};const c=await createUserWithEmailAndPassword(auth,$('#em').value,$('#pw').value);await updateProfile(c.user,{displayName:n});U=auth.currentUser;await loadHist();view()}}catch(x){$('#er').textContent=x.message.replace('Firebase: ','')}}};draw()}
+
+/* ---------- 홈 ---------- */
+async function loadHist(){try{const s=await getDocs(query(collection(db,'rooms'),where('memberIds','array-contains',U.uid)));hist=s.docs.map(d=>({code:d.id,...d.data()})).sort((a,b)=>b.created-a.created)}catch(x){hist=[]}}
+const stName={lobby:'대기중',write:'작성중',discuss:'토론중',done:'종료'};
+function home(){page(`<div class=card><h2>안녕, ${e(U.displayName||'')}</h2><div class=big><button class=pri id=mk>방 만들기</button><button id=jn>방 입장하기</button></div><div id=box style="margin-top:12px"></div></div><div class=card><h3>내 회의 기록</h3>${hist.length?hist.map(h=>`<div class=hist data-c="${h.code}"><div><b>${e(h.title)}</b><div class=mute>${new Date(h.created).toLocaleDateString('ko-KR')} · ${h.code}</div></div><span class=chip>${stName[h.status]}</span></div>`).join(''):'<p class=mute>아직 참여한 회의가 없어요.</p>'}</div>`);
+$$('.hist').forEach(h=>h.onclick=()=>enter(h.dataset.c));
+$('#mk').onclick=()=>{$('#box').innerHTML='<input id=ti placeholder="회의 제목"><button class=pri id=ok style="width:100%">만들기</button>';$('#ok').onclick=create};
+$('#jn').onclick=()=>{$('#box').innerHTML='<input id=cd placeholder="입장 코드 6자리" maxlength=6 style="text-transform:uppercase"><div class=err id=er></div><button class=pri id=ok style="width:100%">입장</button>';$('#ok').onclick=join}}
+async function create(){const c=Math.random().toString(36).slice(2,8).toUpperCase(),me={uid:U.uid,name:U.displayName||'이름없음'};
+await setDoc(doc(db,'rooms',c),{title:$('#ti').value.trim()||'브레인라이팅 회의',host:U.uid,status:'lobby',round:0,roundEnd:0,created:Date.now(),settings:{min:5,count:3,rounds:5,anon:false},members:[me],memberIds:[U.uid]});enter(c)}
+async function join(){const c=$('#cd').value.trim().toUpperCase(),s=await getDoc(doc(db,'rooms',c||'-'));if(!s.exists())return $('#er').textContent='없는 코드야';const d=s.data();
+if(!d.memberIds.includes(U.uid)){if(d.status!=='lobby')return $('#er').textContent='이미 시작된 방이야';await updateDoc(s.ref,{members:arrayUnion({uid:U.uid,name:U.displayName||'이름없음'}),memberIds:arrayUnion(U.uid)})}enter(c)}
+
+/* ---------- 방 ---------- */
+function enter(c){code=c;R=null;ideas=[];chats=[];strokes=[];viewKey='';tab='ideas';curWrite=null;fired={};const r=rref();
+unsubs=[onSnapshot(r,s=>{if(!s.exists())return leave();const nd=s.data();if(curWrite&&R&&R.status==='write'&&(nd.round!==R.round||nd.status!=='write'))saveDom();R=nd;roomRender()}),
+onSnapshot(collection(r,'ideas'),s=>{ideas=s.docs.map(d=>({id:d.id,...d.data()}));if(!R)return;if(R.status==='write'){const p=$('#prev');if(p)p.innerHTML=prevHtml();const mine=ideas.find(d=>d.id===R.round+'_'+U.uid);if(mine)$$('.idea').forEach((t,i)=>{if(!t.value&&mine.items[i])t.value=mine.items[i]})}else if(tab==='ideas')pane()}),
+onSnapshot(query(collection(r,'messages'),orderBy('t')),s=>{chats=s.docs.map(d=>d.data());if(tab==='chat')chatList()}),
+onSnapshot(query(collection(r,'strokes'),orderBy('t')),s=>{strokes=s.docs.map(d=>d.data());if(tab==='board')redraw()})];
+clearInterval(timerI);timerI=setInterval(tick,500)}
+async function leave(){unsubs.forEach(f=>f());unsubs=[];clearInterval(timerI);code=null;R=null;curWrite=null;await loadHist();view()}
+const isHost=()=>R&&R.host===U.uid;
+function roomRender(){if(!R)return;const key=[R.status,R.round,R.memberIds.length,JSON.stringify(R.settings)].join('|');if(key===viewKey)return;viewKey=key;R.status==='lobby'?lobby():R.status==='write'?write():discuss()}
+
+function lobby(){const s=R.settings,h=isHost();page(`<div class=card><h2>${e(R.title)}</h2><p class=mute>친구들에게 이 코드를 알려줘</p><div class=code>${code}</div></div>
+<div class=card><h3>참가자 ${R.members.length}명</h3>${R.members.map(m=>`<span class=chip>${e(m.name)}${m.uid===R.host?' 👑':''}</span>`).join('')}</div>
+<div class=card><h3>설정 <span class=mute>(${R.members.length}명 · ${s.count}개 · ${s.min}분 · ${s.rounds}회)</span></h3>
+<div class=row><label class=mute>시간(분)<input id=sm type=number min=1 max=30 value=${s.min} ${h?'':'disabled'}></label><label class=mute>시트당 개수<input id=sc type=number min=1 max=10 value=${s.count} ${h?'':'disabled'}></label><label class=mute>반복 횟수<input id=sr type=number min=1 max=12 value=${s.rounds} ${h?'':'disabled'}></label></div>
+<label class=row style="gap:8px"><input type=checkbox id=sa ${s.anon?'checked':''} ${h?'':'disabled'} style="width:20px;margin:0;flex:none"> 익명으로 진행(작성자 이름 숨김)</label></div>
+<div class=row><button class=ghost id=lv>나가기</button>${h?'<button class=pri id=st>시작하기</button>':'<p class=mute style="text-align:center">방장이 시작하길 기다리는 중…</p>'}</div>`);
+$('#lv').onclick=leave;if(!h)return;
+const sv=()=>updateDoc(rref(),{settings:{min:+$('#sm').value||5,count:+$('#sc').value||3,rounds:+$('#sr').value||5,anon:$('#sa').checked}});
+['#sm','#sc','#sr','#sa'].forEach(i=>$(i).onchange=sv);
+$('#st').onclick=()=>updateDoc(rref(),{status:'write',round:1,roundEnd:Date.now()+R.settings.min*60000})}
+
+function owner(){const n=R.members.length,i=R.members.findIndex(m=>m.uid===U.uid);return i<0?null:{i,o:R.members[((i-(R.round-1))%n+n)%n],n}}
+function prevHtml(){const w=owner();if(!w)return'';const p=ideas.filter(d=>d.sheet===w.o.uid&&d.round<R.round).sort((a,b)=>a.round-b.round);
+return p.length?p.map(d=>`<div class=prev><u>${e(nm(d.name))}</u><br>${d.items.filter(Boolean).map(t=>'· '+e(t)).join('<br>')}</div>`).join(''):'<p class=mute>첫 라운드예요. 자유롭게 적어봐!</p>'}
+function write(){const w=owner();if(!w)return page('<div class=card>참가자만 볼 수 있어요</div>');curWrite={round:R.round,sheet:w.o.uid};const s=R.settings;
+page(`<div class=card><p class=mute style="text-align:center">라운드 ${R.round} / ${s.rounds} · 대화 금지 🤫</p><div class=timer id=t>--:--</div><div class=bar><b id=pb style="width:100%"></b></div></div>
+<div class=card><h3>${R.round===1?'내 시트':'받은 시트 — 읽고 보완하거나 새 아이디어를 더해줘'}</h3><div id=prev>${prevHtml()}</div><br>${Array.from({length:s.count},(_,i)=>`<textarea class=idea rows=2 placeholder="아이디어 ${i+1}"></textarea>`).join('')}</div>
+${isHost()?'<div class=row><button class=ghost id=pl>+1분</button><button class=pk id=sk>다음 단계로 건너뛰기</button></div>':''}`);
+const mine=ideas.find(d=>d.id===R.round+'_'+U.uid);if(mine)$$('.idea').forEach((t,i)=>t.value=mine.items[i]||'');
+$$('.idea').forEach(t=>t.oninput=()=>{clearTimeout(saveT);saveT=setTimeout(saveDom,400)});
+if(isHost()){$('#pl').onclick=()=>updateDoc(rref(),{roundEnd:R.roundEnd+60000});$('#sk').onclick=advance}}
+function saveDom(){if(!curWrite)return;const items=$$('.idea').map(v=>v.value.trim());if(!items.length)return;setDoc(doc(db,'rooms',code,'ideas',curWrite.round+'_'+U.uid),{sheet:curWrite.sheet,author:U.uid,name:U.displayName||'이름없음',round:curWrite.round,items})}
+function advance(){if(!R||R.status!=='write')return;R.round>=R.settings.rounds?updateDoc(rref(),{status:'discuss'}):updateDoc(rref(),{round:R.round+1,roundEnd:Date.now()+R.settings.min*60000})}
+function tick(){if(!R||R.status!=='write'||!$('#t'))return;const left=Math.max(0,Math.ceil((R.roundEnd-Date.now())/1000));$('#t').textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');$('#pb').style.width=Math.min(100,left/(R.settings.min*60)*100)+'%';
+if(left===0&&!fired[R.round]){fired[R.round]=1;saveDom();if(isHost()){const r=R.round;setTimeout(()=>{if(R.round===r)advance()},1800)}}}
+
+/* ---------- 토론 ---------- */
+function discuss(){curWrite=null;page(`<div class=tabs><button data-t=ideas>아이디어</button><button data-t=board>화이트보드</button><button data-t=chat>채팅</button></div><div id=pane></div>
+<div class=row style="margin-top:14px"><button class=ghost id=lv>나가기</button><button id=dl>기록 다운로드</button>${isHost()&&R.status==='discuss'?'<button class=pk id=fin>회의 종료</button>':''}</div>`);
+$$('.tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;pane()});$('#lv').onclick=leave;$('#dl').onclick=download;if($('#fin'))$('#fin').onclick=()=>updateDoc(rref(),{status:'done'});pane()}
+function sheets(){return R.members.map((m,i)=>({title:`${i+1}번 시트${R.settings.anon?'':' ('+m.name+')'}`,list:ideas.filter(d=>d.sheet===m.uid).sort((a,b)=>a.round-b.round)}))}
+function pane(){$$('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));const p=$('#pane');if(!p)return;
+if(tab==='ideas')p.innerHTML=sheets().map(s=>`<div class=card><h3>${e(s.title)}</h3>${s.list.map(d=>`<div class=prev><u>R${d.round} ${e(nm(d.name))}</u><br>${d.items.filter(Boolean).map(t=>'· '+e(t)).join('<br>')||'-'}</div>`).join('')||'<p class=mute>기록 없음</p>'}</div>`).join('');
+else if(tab==='chat'){p.innerHTML=`<div class=chat id=cl></div><div class=row><input id=ci placeholder="메시지 입력" style="margin:0"><button class=pri id=cs style="flex:none">보내기</button></div>`;chatList();const send=()=>{const v=$('#ci').value.trim();if(!v)return;addDoc(collection(rref(),'messages'),{uid:U.uid,name:U.displayName||'이름없음',text:v,t:Date.now()});$('#ci').value=''};$('#cs').onclick=send;$('#ci').onkeydown=k=>{if(k.key==='Enter')send()}}
+else{p.innerHTML=`<canvas id=cv width=1200 height=750></canvas><div class=pal>${['#76628f','#d48aa8','#2d2a32','#8e8996'].map(c=>`<span data-c=${c} style="background:${c}"></span>`).join('')}<button class=ghost id=er style="padding:5px 10px">지우개</button><span style="flex:1;border:0"></span>${isHost()?'<button class=ghost id=cl2 style="padding:5px 10px">전체 지우기</button>':''}</div>`;
+$$('.pal span[data-c]').forEach(s=>s.onclick=()=>color=s.dataset.c);$('#er').onclick=()=>color='#ffffff';if($('#cl2'))$('#cl2').onclick=async()=>{(await getDocs(collection(rref(),'strokes'))).forEach(d=>deleteDoc(d.ref))};board()}}
+function chatList(){const c=$('#cl');if(!c)return;c.innerHTML=chats.map(m=>`<p><b>${e(m.name)}</b> ${e(m.text)}</p>`).join('');c.scrollTop=c.scrollHeight}
+let cur=null;
+function draw1(x,s){if(s.pts.length<2)return;x.beginPath();x.strokeStyle=s.c;x.lineWidth=s.w;x.lineCap=x.lineJoin='round';for(let i=0;i<s.pts.length;i+=2)x[i?'lineTo':'moveTo'](s.pts[i]*1200,s.pts[i+1]*750);x.stroke()}
+function redraw(){const c=$('#cv');if(!c)return;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,1200,750);strokes.forEach(s=>draw1(x,s));if(cur)draw1(x,cur)}
+function board(){const c=$('#cv');redraw();const pos=ev=>{const r=c.getBoundingClientRect();return[+((ev.clientX-r.left)/r.width).toFixed(4),+((ev.clientY-r.top)/r.height).toFixed(4)]};
+c.onpointerdown=ev=>{ev.preventDefault();c.setPointerCapture(ev.pointerId);cur={pts:pos(ev),c:color,w:color==='#ffffff'?28:4}};
+c.onpointermove=ev=>{if(!cur)return;ev.preventDefault();cur.pts.push(...pos(ev));redraw()};
+const up=()=>{if(!cur)return;const s=cur;cur=null;if(s.pts.length<4)s.pts.push(s.pts[0]+.001,s.pts[1]);addDoc(collection(rref(),'strokes'),{...s,t:Date.now(),u:U.uid})};
+c.onpointerup=up;c.onpointercancel=up}
+
+function download(){const L=[`# ${R.title}`,`방 코드: ${code}`,`날짜: ${new Date(R.created).toLocaleString('ko-KR')}`,`참가자: ${R.members.map(m=>R.settings.anon?'익명':m.name).join(', ')}`,`설정: ${R.settings.min}분 / ${R.settings.count}개 / ${R.settings.rounds}회`,'','## 아이디어 시트',''];
+sheets().forEach(s=>{L.push('### '+s.title);s.list.forEach(d=>{L.push(`[라운드 ${d.round}] ${nm(d.name)}`);d.items.filter(Boolean).forEach(t=>L.push('  - '+t))});L.push('')});
+L.push('## 채팅','');chats.forEach(m=>L.push(`${new Date(m.t).toLocaleTimeString('ko-KR')} ${m.name}: ${m.text}`));
+const b=new Blob(['\uFEFF'+L.join('\r\n')],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`회의기록_${code}.txt`;document.body.append(a);a.click();a.remove()}
+</script></body></html>
