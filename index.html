@@ -25,20 +25,24 @@ input:focus,textarea:focus{outline:none;border-color:var(--p)}
 .mute{color:var(--mute);font-size:14px}.err{color:#b4506f;font-size:14px;min-height:20px}
 .timer{font-size:40px;font-weight:800;color:var(--pd);text-align:center}
 .bar{height:8px;background:var(--line);border-radius:8px;overflow:hidden}.bar b{display:block;height:100%;background:var(--p)}
-.prev{background:var(--pl);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:14px;overflow:hidden}.prev u{text-decoration:none;font-weight:700;color:var(--pd)}.prev.pick{background:var(--pk)}
-.prev .ac{float:right;display:flex;gap:4px}.prev .ac button{padding:2px 8px;font-size:13px}
+.prev{background:var(--pl);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:14px;overflow:hidden}.prev u{text-decoration:none;font-weight:700;color:var(--pd)}
 .tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;border-color:var(--line);padding:9px 4px}.tabs .on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .hist{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:2px solid var(--line);cursor:pointer}
-#wrap{overflow:auto;max-height:62vh;border:2px solid var(--line);border-radius:14px;background:#fff;overscroll-behavior:contain}
-#bd{position:relative;width:100%}#cv{width:100%;aspect-ratio:16/10;display:block;touch-action:none;position:relative;z-index:1}
-#il{position:absolute;inset:0;z-index:0}#il img{position:absolute;pointer-events:none;border:0;outline:0}
-#bd.mi #il img{pointer-events:auto;touch-action:none;cursor:move}
-.pal{display:flex;gap:8px;margin:8px 0;align-items:center;flex-wrap:wrap}.pal span.c{width:28px;height:28px;border-radius:50%;border:3px solid var(--line);cursor:pointer}.pal button{padding:5px 10px;font-size:14px}
 .chat{height:340px;overflow:auto;background:var(--pl);border-radius:12px;padding:10px;margin-bottom:8px}.chat p{margin-bottom:8px;font-size:15px}
 .modal{position:fixed;inset:0;background:#2d2a3299;display:flex;align-items:center;justify-content:center;padding:18px;z-index:9}.modal .card{max-width:480px;max-height:85vh;overflow:auto;margin:0;width:100%}
 .modal li{margin:0 0 8px 18px;font-size:15px}
 .pick span{display:inline-block;font-size:26px;padding:4px 8px;border-radius:12px;cursor:pointer;border:2px solid transparent}.pick span.on{border-color:var(--pd);background:var(--pl)}
 .task{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:2px solid var(--line)}.task input{width:20px;margin:0;flex:none}.task button{margin-left:auto;padding:2px 8px;font-size:13px}.done{text-decoration:line-through;color:var(--mute)}
+.stats{display:flex;gap:8px;margin-bottom:14px}.stat{flex:1;background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px;text-align:center;font-size:13px;color:var(--mute)}.stat b{display:block;font-size:22px;color:var(--pd)}
+.notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.note{background:var(--pl);border-radius:12px;padding:12px;font-size:14px;display:flex;flex-direction:column;justify-content:space-between;gap:8px;word-break:break-word}.note.pick{background:var(--pk)}
+.note .nf{display:flex;justify-content:space-between;align-items:center;gap:6px}.note small{color:var(--mute)}.note button{padding:1px 7px;font-size:12px;margin-left:3px}
+.rd{border-left:4px solid var(--p);padding-left:10px;margin:10px 0}.rh{font-size:13px;color:var(--mute);margin-bottom:4px}.rh b{background:var(--p);color:#fff;border-radius:8px;padding:1px 7px;margin-right:6px}
+.it{background:var(--pl);border-radius:10px;padding:7px 10px;margin:4px 0;font-size:14px}
+.seg{display:flex;gap:6px;margin-bottom:12px}.seg button{flex:1;padding:6px;border-color:var(--line)}
+.gg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.gg button{height:70px;font-size:30px;padding:0;border-color:var(--line);background:var(--pl)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:14px;z-index:20;font-weight:700;max-width:90vw;text-align:center}
+#sl{width:100%;border:2px solid var(--line);border-radius:12px;background:#fff;display:block}
 @media(max-width:520px){.big{grid-template-columns:1fr}.timer{font-size:34px}}
 </style></head><body>
 <header><div class="logo"><i></i>브레인라이팅</div><div class="row nf"><button class="ghost" id="mn" style="display:none">⋯ 메뉴</button><button class="ghost" id="more">더보기</button><button class="ghost" id="out" style="display:none">로그아웃</button></div></header>
@@ -55,29 +59,37 @@ const app0=initializeApp(firebaseConfig),auth=getAuth(app0),db=getFirestore(app0
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const e=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ICONS=['🙂','🦊','🐱','🐻','🐰','🌷','🍀','⭐'],COLORS=['#9d88b8','#d48aa8','#8e8996','#76628f','#c79ab0','#5f5a66'];
-let U=null,code=null,R=null,ideas=[],chats=[],strokes=[],imgs=[],tasks=[],pres={},unsubs=[],viewKey='',tab='ideas',timerI=null,beatI=null,curWrite=null,hist=[],fired={},saveT=null,color='#76628f',P={icon:'🙂',color:'#9d88b8'},vs=0,z=1,md='draw',cur=null,dr={title:'',mode:'bw',min:5,count:3,rounds:5,anon:false};
+let U=null,code=null,R=null,ideas=[],chats=[],tasks=[],slides=[],sigs=[],sigsInit=0,lastDk='',pres={},unsubs=[],viewKey='',tab='ideas',timerI=null,beatI=null,curWrite=null,hist=[],fired={},saveT=null,P={icon:'🙂',color:'#9d88b8'},vs=0,bwv='sheet',dr={title:'',mode:'bw',min:5,count:3,rounds:5,anon:false};
 const page=h=>{$('#main').innerHTML=h};
 const rref=()=>doc(db,'rooms',code),col=n=>collection(db,'rooms',code,n);
-const nm=n=>R.settings.anon?'익명':n;
 const SID=()=>R.sid||0,VS=()=>vs||SID(),sd=d=>d.sid||0;
+const PT=()=>R.parts||R.members;
+const ptsOf=S=>(R.meets&&R.meets[S]&&R.meets[S].parts)||R.members;
+const an=S=>R.meets&&R.meets[S]&&R.meets[S].anon!==undefined?R.meets[S].anon:R.settings.anon;
+const nmS=(S,n)=>an(S)?'익명':n;
+const nm=n=>nmS(SID(),n);
 const mdOf=S=>(R.meets&&R.meets[S]&&R.meets[S].mode)||R.mode;
 const mName=m=>m==='bs'?'브레인스토밍':'브레인라이팅';
 const me=()=>({uid:U.uid,name:U.displayName||'이름없음',icon:P.icon,color:P.color});
+const isOn=m=>pres[m.uid]&&Date.now()-pres[m.uid].t<40000;
 const chip=m=>`<span class=chip style="background:${m.color||'#9d88b8'}33"><span>${m.icon||''}</span> ${e(m.name)}${R&&m.uid===R.host?' 👑':''}</span>`;
+const pchip=m=>`<span class=chip style="background:${m.color||'#9d88b8'}33;opacity:${isOn(m)?1:.5}">${isOn(m)?'🟢':'⚪'} ${m.icon||''} ${e(m.name)}${R&&m.uid===R.host?' 👑':''}</span>`;
 const PR=['비판 보류','질보다 양','자유로운 분위기','결합·개선'];
 const STEPS=['준비','생성','토론·분류','선택'];
-const stepIdx=()=>R.status==='write'?1:(ideas.some(d=>d.pick&&sd(d)===SID())?3:2);
 const isHost=()=>R&&R.host===U.uid;
-const top=()=>{const m=R.status!=='lobby';return`<div class=topic><small>${e(R.team||R.title)}${m?' · 주제':' · 팀 코드 '+code}</small><b>${m?e(R.title):e(R.team||R.title)}</b>${m?` <span class=chip>${mName(R.mode)}</span>`:''}${m&&R.mode==='bs'?`<div class=steps>${STEPS.map((s,i)=>`<span class="${i===stepIdx()?'on':''}">${i+1}. ${s}</span>`).join('')}</div>`:''}<div id=on class=mute style="color:#bdb6c9"></div></div>`};
+const toast=t=>{const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.append(d);setTimeout(()=>d.remove(),4000)};
+const top=()=>{const m=R.status==='write';return`<div class=topic><small>${e(R.team||R.title)}${m?' · 주제':' · 팀 코드 '+code}</small><b>${m?e(R.title):e(R.team||R.title)}</b>${m?` <span class=chip>${mName(R.mode)}</span>`:''}${m&&R.mode==='bs'?`<div class=steps>${STEPS.map((s,i)=>`<span class="${i===1?'on':''}">${i+1}. ${s}</span>`).join('')}</div>`:''}<div id=on class=mute style="color:#bdb6c9"></div></div>`};
+const partsCard=()=>`<div class=card><h3>지금 회의 참가자</h3><div id=pp></div></div>`;
 
-$('#more').onclick=()=>{const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class=card><h2>이 서비스는?</h2><p class=mute>모둠 회의에서 정적이 흐를 때, 아이디어 내기 절차를 차근차근 안내해줘요.</p><br><h3>팀</h3><ol><li>방장이 팀을 만들고 코드를 공유해요.</li><li>팀원이 코드로 들어오면 팀 안에서 채팅, 업무, 회의를 함께 해요.</li><li>방장이 원할 때마다 브레인라이팅/브레인스토밍 회의를 새로 시작해요(1차, 2차…).</li></ol><h3>브레인라이팅</h3><ol><li>정해진 시간 동안 아이디어를 적어요. 대화 금지!</li><li>시간이 끝나면 내 시트가 옆 사람에게 넘어가요.</li><li>받은 시트를 읽고 보완·발전시켜 적어요.</li><li>정해진 횟수만큼 반복한 뒤 토론해요.</li></ol><h3>브레인스토밍</h3><ol><li>준비: 주제·목표를 정하고 4대 원칙을 확인해요.</li><li>생성: 비판 없이, 양 위주로, 자유롭게, 서로의 아이디어를 결합해요.</li><li>토론·분류: 비슷한 것끼리 '분류'로 묶고 다듬어요.</li><li>선택: ♥ 투표 후 방장이 ★로 최종안을 채택해요.</li></ol><br><p class=mute>모든 기록은 팀에 남고, 오른쪽 위 ⋯ 메뉴에서 txt로 저장할 수 있어요.</p><br><button class=pri id=x style="width:100%">닫기</button></div>`;document.body.append(m);m.onclick=ev=>{if(ev.target===m||ev.target.id==='x')m.remove()}};
+$('#more').onclick=()=>{const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class=card><h2>이 서비스는?</h2><p class=mute>모둠 회의에서 정적이 흐를 때, 아이디어 내기 절차를 차근차근 안내해줘요.</p><br><h3>팀</h3><ol><li>방장이 팀을 만들고 코드를 공유해요.</li><li>팀원이 코드로 들어오면 팀 안에서 채팅, 업무, 발표, 회의를 함께 해요.</li><li>방장이 회의를 시작하면, 그때 팀 페이지에 접속 중인 팀원이 자동으로 참가해요.</li></ol><h3>브레인라이팅</h3><ol><li>정해진 시간 동안 아이디어를 적어요. 대화 금지!</li><li>시간이 끝나면 내 시트가 옆 사람에게 넘어가요.</li><li>정해진 횟수만큼 돌리면 회의가 끝나고 결과가 정리돼요.</li></ol><h3>브레인스토밍</h3><ol><li>준비: 주제·목표를 정하고 4대 원칙을 확인해요.</li><li>생성: 비판 없이, 양 위주로, 자유롭게, 서로의 아이디어를 결합해요.</li><li>토론·분류: 회의가 끝난 뒤 결과 화면에서 '분류'로 묶고 ♥ 투표해요.</li><li>선택: 방장이 ★로 최종안을 채택해요.</li></ol><br><p class=mute>시간이 모자라면 ⏰, 다 썼으면 ⏭ 버튼으로 팀에게 알려요. 모든 기록은 팀에 남고, 오른쪽 위 ⋯ 메뉴에서 txt로 저장할 수 있어요.</p><br><button class=pri id=x style="width:100%">닫기</button></div>`;document.body.append(m);m.onclick=ev=>{if(ev.target===m||ev.target.id==='x')m.remove()}};
 $('#out').onclick=()=>signOut(auth);
-$('#mn').onclick=()=>{if(!R)return;const h=isHost(),m=document.createElement('div');m.className='modal';m.innerHTML=`<div class=card><h2>메뉴</h2><div style="display:grid;gap:8px"><button id=m1>⬇ 회의 기록 저장</button><button id=m2>🏠 홈으로</button>${h&&R.status!=='lobby'?'<button class=pk id=m3>현재 회의 종료</button>':''}<button class=ghost id=m4>팀 나가기</button><button class=ghost id=m5>닫기</button></div></div>`;document.body.append(m);
+$('#mn').onclick=()=>{if(!R)return;const h=isHost(),m=document.createElement('div');m.className='modal';m.innerHTML=`<div class=card><h2>메뉴</h2><div style="display:grid;gap:8px"><button id=m1>⬇ 회의 기록 저장</button><button id=m2>🏠 홈으로</button>${h&&R.status==='write'?'<button class=pk id=m3>현재 회의 종료</button>':''}<button class=ghost id=m4>팀 나가기</button><button class=ghost id=m5>닫기</button></div></div>`;document.body.append(m);
 m.onclick=ev=>{if(ev.target===m)m.remove()};$('#m5').onclick=()=>m.remove();
 $('#m1').onclick=()=>{m.remove();download()};$('#m2').onclick=()=>{m.remove();leave()};$('#m4').onclick=()=>{m.remove();exitRoom()};
-if($('#m3'))$('#m3').onclick=()=>{m.remove();if(confirm('현재 회의를 종료할까? 기록은 그대로 남아.'))updateDoc(rref(),{status:'lobby'})}};
+if($('#m3'))$('#m3').onclick=()=>{m.remove();if(confirm('현재 회의를 지금 종료할까? 기록은 그대로 남아.'))updateDoc(rref(),{status:'lobby'})}};
 const showErr=m=>{$('#main').innerHTML=`<div class=card><h2>앗, 오류가 났어</h2><p class=err style="white-space:pre-wrap">${e(m)}</p></div>`};
 window.addEventListener('unhandledrejection',x=>showErr(x.reason?.message||x.reason));
+document.addEventListener('keydown',ev=>{if(tab!=='board'||!R||R.status==='write'||!canCtl())return;if(ev.key==='ArrowRight')go(1);if(ev.key==='ArrowLeft')go(-1)});
 setTimeout(()=>{if(!U&&!code)authView()},0);
 
 /* 인증 */
@@ -91,8 +103,7 @@ $('#go').onclick=async()=>{try{if(mode==='in')await signInWithEmailAndPassword(a
 /* 홈 */
 async function loadHist(){try{const u=await getDoc(doc(db,'users',U.uid));if(u.exists())P={...P,...u.data()}}catch(x){}
 try{const s=await getDocs(query(collection(db,'rooms'),where('memberIds','array-contains',U.uid)));hist=s.docs.map(d=>({code:d.id,...d.data()})).sort((a,b)=>b.created-a.created)}catch(x){hist=[]}}
-const stName={lobby:'대기',write:'회의 중',discuss:'토론 중',done:'대기'};
-function home(){page(`<div class=card><div class=row><h2>${P.icon} 안녕, ${e(U.displayName||'')}</h2><button class=ghost id=pf style="flex:none">프로필</button></div><div class=big><button class=pri id=mk>팀 만들기</button><button id=jn>팀 입장하기</button></div><div id=box style="margin-top:12px"></div></div><div class=card><h3>내 팀</h3>${hist.length?hist.map(h=>`<div class=hist data-c="${h.code}"><div><b>${e(h.team||h.title)}</b><div class=mute>${new Date(h.created).toLocaleDateString('ko-KR')} · ${h.code} · ${h.memberIds.length}명 · 회의 ${h.sid||0}회</div></div><span class=chip>${stName[h.status]||''}</span></div>`).join(''):'<p class=mute>아직 참여한 팀이 없어요.</p>'}</div>`);
+function home(){page(`<div class=card><div class=row><h2>${P.icon} 안녕, ${e(U.displayName||'')}</h2><button class=ghost id=pf style="flex:none">프로필</button></div><div class=big><button class=pri id=mk>팀 만들기</button><button id=jn>팀 입장하기</button></div><div id=box style="margin-top:12px"></div></div><div class=card><h3>내 팀</h3>${hist.length?hist.map(h=>`<div class=hist data-c="${h.code}"><div><b>${e(h.team||h.title)}</b><div class=mute>${new Date(h.created).toLocaleDateString('ko-KR')} · ${h.code} · ${h.memberIds.length}명 · 회의 ${h.sid||0}회</div></div><span class=chip>${h.status==='write'?'회의 중':'대기'}</span></div>`).join(''):'<p class=mute>아직 참여한 팀이 없어요.</p>'}</div>`);
 $$('.hist').forEach(h=>h.onclick=()=>enter(h.dataset.c));$('#pf').onclick=profile;
 $('#mk').onclick=()=>{$('#box').innerHTML='<input id=ti placeholder="팀 이름"><button class=pri id=ok style="width:100%">만들기</button>';$('#ok').onclick=create};
 $('#jn').onclick=()=>{$('#box').innerHTML='<input id=cd placeholder="팀 코드 6자리" maxlength=6 style="text-transform:uppercase"><div class=err id=er></div><button class=pri id=ok style="width:100%">입장</button>';$('#ok').onclick=join}}
@@ -101,85 +112,110 @@ const pick=(id,k,f)=>$$('#'+id+' span').forEach(s=>s.onclick=()=>{f(s.dataset[k]
 m.onclick=ev=>{if(ev.target===m)m.remove()};
 $('#sv').onclick=async()=>{const n=$('#pn').value.trim();if(n&&n!==U.displayName)await updateProfile(auth.currentUser,{displayName:n});P={icon:ic,color:cl};await setDoc(doc(db,'users',U.uid),P);m.remove();home()}}
 async function create(){const c=Math.random().toString(36).slice(2,8).toUpperCase(),t=$('#ti').value.trim()||'우리 팀';
-await setDoc(doc(db,'rooms',c),{team:t,title:'',mode:'bw',host:U.uid,status:'lobby',round:0,roundEnd:0,sid:0,meets:{},created:Date.now(),settings:{min:5,count:3,rounds:5,anon:false},members:[me()],memberIds:[U.uid]});enter(c)}
+await setDoc(doc(db,'rooms',c),{team:t,title:'',mode:'bw',host:U.uid,status:'lobby',round:0,roundEnd:0,sid:0,meets:{},deck:null,created:Date.now(),settings:{min:5,count:3,rounds:5,anon:false},members:[me()],memberIds:[U.uid]});enter(c)}
 async function join(){const c=$('#cd').value.trim().toUpperCase(),s=await getDoc(doc(db,'rooms',c||'-'));if(!s.exists())return $('#er').textContent='없는 코드야';const d=s.data();
-if(!d.memberIds.includes(U.uid)){if(d.status==='write')return $('#er').textContent='회의가 진행 중이야. 끝난 뒤에 입장해줘';await updateDoc(s.ref,{members:arrayUnion(me()),memberIds:arrayUnion(U.uid)})}enter(c)}
+if(!d.memberIds.includes(U.uid))await updateDoc(s.ref,{members:arrayUnion(me()),memberIds:arrayUnion(U.uid)});enter(c)}
 
 /* 팀 */
-function enter(c){code=c;R=null;ideas=[];chats=[];strokes=[];imgs=[];tasks=[];pres={};viewKey='';tab='ideas';curWrite=null;fired={};vs=0;md='draw';dr={title:'',mode:'bw',min:5,count:3,rounds:5,anon:false};$('#mn').style.display='';
-unsubs=[onSnapshot(rref(),s=>{if(!s.exists())return leave();const nd=s.data();if(curWrite&&R&&R.status==='write'&&(nd.round!==R.round||nd.status!=='write'||nd.sid!==R.sid))saveDom();R=nd;roomRender()}),
-onSnapshot(col('ideas'),s=>{ideas=s.docs.map(d=>({id:d.id,...d.data()}));if(!R)return;if(R.status==='write'){if(R.mode==='bs')feed();else{const p=$('#prev');if(p)p.innerHTML=prevHtml();const mine=ideas.find(d=>d.id===SID()+'_'+R.round+'_'+U.uid);if(mine)$$('.idea').forEach((t,i)=>{if(!t.value&&mine.items[i])t.value=mine.items[i]})}}else if(tab==='ideas'&&!(document.activeElement&&document.activeElement.tagName==='INPUT'))pane()}),
+function enter(c){code=c;R=null;ideas=[];chats=[];tasks=[];slides=[];sigs=[];sigsInit=0;lastDk='';pres={};viewKey='';tab='ideas';curWrite=null;fired={};vs=0;dr={title:'',mode:'bw',min:5,count:3,rounds:5,anon:false};$('#mn').style.display='';
+unsubs=[onSnapshot(rref(),s=>{if(!s.exists())return leave();const nd=s.data();if(curWrite&&R&&R.status==='write'&&(nd.round!==R.round||nd.status!=='write'||nd.sid!==R.sid))saveDom();R=nd;roomRender();const dk=R.deck?R.deck.id:'';if(tab==='board'&&R.status!=='write'){dk!==lastDk?pane():slideUpdate()}lastDk=dk}),
+onSnapshot(col('ideas'),s=>{ideas=s.docs.map(d=>({id:d.id,...d.data()}));if(!R)return;if(R.status==='write'){if(R.mode==='bs')feed();else{const p=$('#prev');if(p)p.innerHTML=prevHtml();const mine=ideas.find(d=>d.id===SID()+'_'+R.round+'_'+U.uid);if(mine)$$('.idea').forEach((t,i)=>{if(!t.value&&mine.items[i])t.value=mine.items[i]})}egg()}else if(tab==='ideas'&&!(document.activeElement&&document.activeElement.tagName==='INPUT'))pane()}),
 onSnapshot(query(col('messages'),orderBy('t')),s=>{chats=s.docs.map(d=>d.data());if(tab==='chat')chatList()}),
-onSnapshot(query(col('strokes'),orderBy('t')),s=>{strokes=s.docs.map(d=>d.data());if(tab==='board')redraw()}),
-onSnapshot(col('imgs'),s=>{imgs=s.docs.map(d=>({id:d.id,...d.data()}));if(tab==='board')imgR()}),
+onSnapshot(col('slides'),s=>{slides=s.docs.map(d=>d.data()).sort((a,b)=>a.i-b.i);slideUpdate()}),
 onSnapshot(col('tasks'),s=>{tasks=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.due||'9').localeCompare(b.due||'9'));if(tab==='team'&&R&&R.status!=='write')pane()}),
+onSnapshot(col('signals'),s=>{sigs=s.docs.map(d=>({id:d.id,...d.data()}));if(sigsInit)s.docChanges().forEach(c=>{if(c.type==='added'){const x=c.doc.data();if(R&&x.uid!==U.uid&&x.sid===SID()&&R.status==='write'&&Date.now()-x.t<20000)toast((x.kind==='more'?'⏰ ':'⏭ ')+nm(x.name)+': '+(x.kind==='more'?'시간이 부족해요':'다 썼어요, 넘겨요'))}});sigsInit=1;sigR()}),
 onSnapshot(col('presence'),s=>{pres={};s.docs.forEach(d=>pres[d.id]=d.data());online()})];
 const beat=()=>code&&setDoc(doc(db,'rooms',code,'presence',U.uid),{t:Date.now()}).catch(()=>{});beat();clearInterval(beatI);beatI=setInterval(()=>{beat();online()},15000);
 clearInterval(timerI);timerI=setInterval(tick,500)}
-function online(){const o=$('#on');if(!o||!R)return;const l=R.members.filter(m=>pres[m.uid]&&Date.now()-pres[m.uid].t<40000);o.textContent='● 접속 중 '+l.length+'명: '+l.map(m=>m.name).join(', ')}
+function online(){if(!R)return;const o=$('#on');if(o){const l=R.members.filter(isOn);o.textContent='● 팀 페이지 접속 중 '+l.length+'명: '+l.map(m=>m.name).join(', ')}const pp=$('#pp');if(pp)pp.innerHTML=PT().map(pchip).join('')}
 async function leave(){unsubs.forEach(f=>f());unsubs=[];clearInterval(timerI);clearInterval(beatI);code=null;R=null;curWrite=null;$('#mn').style.display='none';await loadHist();view()}
 async function exitRoom(){if(!confirm('이 팀에서 완전히 나갈까? 내 팀 목록에서도 사라져. (내가 남긴 기록은 팀에 남아)'))return;
 const ms=R.members.filter(m=>m.uid!==U.uid),up={members:ms,memberIds:R.memberIds.filter(i=>i!==U.uid)};if(R.host===U.uid&&ms.length)up.host=ms[0].uid;
 const rf=rref();unsubs.forEach(f=>f());unsubs=[];await updateDoc(rf,up);leave()}
 function roomRender(){if(!R)return;const key=[R.status,R.round,R.mode,R.title,R.team,SID(),R.memberIds.length,JSON.stringify(R.settings)].join('|');if(key===viewKey)return;viewKey=key;R.status==='write'?(R.mode==='bs'?writeBs():write()):hub();online()}
 
-/* 회의 시작 카드 */
-function meetCard(){const h=isHost(),bs=dr.mode==='bs',mem=`<div style="margin-top:6px">${R.members.map(chip).join('')}</div>`;
-if(!h)return`<div class=card><h3>새 회의</h3><p class=mute>방장이 새 회의를 시작하길 기다리는 중… 시작하면 화면이 자동으로 바뀌어요.</p>${mem}</div>`;
+/* 회의 시작 */
+function meetCard(){const h=isHost(),bs=dr.mode==='bs',on=R.members.filter(isOn),mem=`<div style="margin-top:8px"><p class=mute>지금 팀 페이지에 접속 중인 팀원이 자동으로 참가해요.</p>${R.members.map(pchip).join('')}</div>`;
+if(!h)return`<div class=card><h3>새 회의</h3><p class=mute>방장이 새 회의를 시작하면 이 페이지에 있는 사람은 자동으로 들어가요.</p>${mem}</div>`;
 return`<div class=card><h3>새 회의 시작 (${SID()+1}차)</h3><input id=mt value="${e(dr.title)}" placeholder="회의 주제"><select id=mo><option value=bw ${bs?'':'selected'}>브레인라이팅 (말없이 돌려쓰기)</option><option value=bs ${bs?'selected':''}>브레인스토밍 (실시간 자유 발상)</option></select>
 ${bs?`<div style="margin-bottom:8px">${PR.map(p=>`<span class=chip>${p}</span>`).join('')}</div>`:''}
 <div class=row><label class=mute>시간(분)<input id=sm type=number min=1 max=60 value=${dr.min}></label>${bs?'':`<label class=mute>시트당 개수<input id=sc type=number min=1 max=10 value=${dr.count}></label><label class=mute>반복 횟수<input id=sr type=number min=1 max=12 value=${dr.rounds}></label>`}</div>
 <label class=row style="gap:8px;margin-bottom:10px"><input type=checkbox id=sa ${dr.anon?'checked':''} style="width:20px;margin:0;flex:none"> 익명으로 진행</label>
-<button class=pri id=st style="width:100%">시작하기</button>${mem}</div>`}
+<button class=pri id=st style="width:100%">시작하기 (접속 중 ${on.length}명)</button>${mem}</div>`}
 function wireMeet(){if(!isHost()||!$('#st'))return;
 const sync=()=>{dr.title=$('#mt').value;dr.min=+$('#sm').value||5;if($('#sc')){dr.count=+$('#sc').value||3;dr.rounds=+$('#sr').value||5}dr.anon=$('#sa').checked};
 ['#mt','#sm','#sc','#sr','#sa'].forEach(i=>$(i)&&($(i).oninput=sync));
 $('#mo').onchange=()=>{sync();dr.mode=$('#mo').value;pane()};
-$('#st').onclick=()=>{sync();if(R.status!=='lobby')return;const m=SID()+1,t=dr.title.trim()||m+'차 회의';
-updateDoc(rref(),{status:'write',sid:m,title:t,mode:dr.mode,round:1,roundEnd:Date.now()+dr.min*60000,settings:{min:dr.min,count:dr.count,rounds:dr.rounds,anon:dr.anon},['meets.'+m]:{title:t,mode:dr.mode}});dr.title=''}}
+$('#st').onclick=()=>{sync();if(R.status==='write')return;const m=SID()+1,t=dr.title.trim()||m+'차 회의',parts=R.members.filter(x=>x.uid===U.uid||isOn(x));
+updateDoc(rref(),{status:'write',sid:m,title:t,mode:dr.mode,round:1,roundEnd:Date.now()+dr.min*60000,parts,settings:{min:dr.min,count:dr.count,rounds:dr.rounds,anon:dr.anon},['meets.'+m]:{title:t,mode:dr.mode,anon:dr.anon,parts}});dr.title=''}}
 
 /* 라이팅 */
-function owner(){const n=R.members.length,i=R.members.findIndex(m=>m.uid===U.uid);return i<0?null:{i,o:R.members[((i-(R.round-1))%n+n)%n],n}}
+function owner(){const ps=PT(),n=ps.length,i=ps.findIndex(m=>m.uid===U.uid);return i<0?null:{i,o:ps[((i-(R.round-1))%n+n)%n],n}}
 function prevHtml(){const w=owner();if(!w)return'';const p=ideas.filter(d=>!d.kind&&sd(d)===SID()&&d.sheet===w.o.uid&&d.round<R.round).sort((a,b)=>a.round-b.round);
 return p.length?p.map(d=>`<div class=prev><u>${e(nm(d.name))}</u><br>${d.items.filter(Boolean).map(t=>'· '+e(t)).join('<br>')}</div>`).join(''):'<p class=mute>첫 라운드예요. 자유롭게 적어봐!</p>'}
 const timerCard=l=>`<div class=card><p class=mute style="text-align:center">${l}</p><div class=timer id=t>--:--</div><div class=bar><b id=pb style="width:100%"></b></div></div>`;
 const hostBtns=()=>isHost()?'<div class=row><button class=ghost id=pl>+1분</button><button class=pk id=sk>다음 단계로 건너뛰기</button></div>':'';
 const hostWire=()=>{if(isHost()){$('#pl').onclick=()=>updateDoc(rref(),{roundEnd:R.roundEnd+60000});$('#sk').onclick=advance}};
-function write(){vs=0;const w=owner();if(!w)return page(`${top()}<div class=card>이번 회의 참가자가 아니에요. 끝날 때까지 기다려줘.</div>`);curWrite={round:R.round,sheet:w.o.uid,sid:SID()};const s=R.settings;
-page(`${top()}${timerCard(`라운드 ${R.round} / ${s.rounds} · 대화 금지 🤫`)}
-<div class=card><h3>${R.round===1?'내 시트':'받은 시트 — 읽고 보완하거나 새 아이디어를 더해줘'}</h3><div id=prev>${prevHtml()}</div><br>${Array.from({length:s.count},(_,i)=>`<textarea class=idea rows=2 placeholder="아이디어 ${i+1}"></textarea>`).join('')}</div>${hostBtns()}`);
+const sigCard=()=>`<div class=card><div class=row><button id=s1>⏰ 시간이 부족해요</button><button id=s2>⏭ 다 썼어요, 넘겨요</button></div><div id=sig class=mute style="margin-top:8px"></div></div>`;
+function sigWire(){$('#s1').onclick=()=>sendSig('more');$('#s2').onclick=()=>sendSig('skip');sigR()}
+function sendSig(k){const id=SID()+'_'+R.round+'_'+U.uid,r=doc(db,'rooms',code,'signals',id),ex=sigs.find(x=>x.id===id);ex&&ex.kind===k?deleteDoc(r):setDoc(r,{sid:SID(),round:R.round,uid:U.uid,name:U.displayName||'이름없음',kind:k,t:Date.now()})}
+function sigR(){const el=$('#sig');if(!el||!R)return;const l=sigs.filter(x=>x.sid===SID()&&x.round===R.round),m=l.filter(x=>x.kind==='more'),s=l.filter(x=>x.kind==='skip'),mine=l.find(x=>x.uid===U.uid);
+el.innerHTML=(m.length?`<div>⏰ 시간이 더 필요해요: <b>${m.length}명</b> (${m.map(x=>e(nm(x.name))).join(', ')})</div>`:'')+(s.length?`<div>⏭ 넘기자고 해요: <b>${s.length}명</b> (${s.map(x=>e(nm(x.name))).join(', ')})</div>`:'')||'버튼으로 팀원에게 알릴 수 있어요.';
+$('#s1').classList.toggle('on',!!mine&&mine.kind==='more');$('#s2').classList.toggle('on',!!mine&&mine.kind==='skip')}
+function write(){vs=0;const w=owner();if(!w)return page(`${top()}${partsCard()}<div class=card><p class=mute>이번 회의는 시작할 때 접속해 있던 팀원만 참가해요. 끝나면 결과가 자동으로 보여요.</p></div>`);curWrite={round:R.round,sheet:w.o.uid,sid:SID()};const s=R.settings;
+page(`${top()}${timerCard(`라운드 ${R.round} / ${s.rounds} · 대화 금지 🤫`)}${partsCard()}
+<div class=card><h3>${R.round===1?'내 시트':'받은 시트 — 읽고 보완하거나 새 아이디어를 더해줘'}</h3><div id=prev>${prevHtml()}</div><br>${Array.from({length:s.count},(_,i)=>`<textarea class=idea rows=2 placeholder="아이디어 ${i+1}"></textarea>`).join('')}</div><div id=egg></div>${sigCard()}${hostBtns()}`);
 const mine=ideas.find(d=>d.id===SID()+'_'+R.round+'_'+U.uid);if(mine)$$('.idea').forEach((t,i)=>t.value=mine.items[i]||'');
-$$('.idea').forEach(t=>t.oninput=()=>{clearTimeout(saveT);saveT=setTimeout(saveDom,400)});hostWire();online()}
+$$('.idea').forEach(t=>t.oninput=()=>{clearTimeout(saveT);saveT=setTimeout(saveDom,400);egg()});hostWire();sigWire();online();egg()}
 function saveDom(){if(!curWrite)return;const items=$$('.idea').map(v=>v.value.trim());if(!items.length)return;setDoc(doc(db,'rooms',code,'ideas',curWrite.sid+'_'+curWrite.round+'_'+U.uid),{sid:curWrite.sid,sheet:curWrite.sheet,author:U.uid,name:U.displayName||'이름없음',round:curWrite.round,items})}
-function writeBs(){vs=0;curWrite=null;page(`${top()}${timerCard('생성 단계 · 비판 없이, 많이, 자유롭게')}
+function writeBs(){vs=0;curWrite=null;if(!owner())return page(`${top()}${partsCard()}<div class=card><p class=mute>이번 회의는 시작할 때 접속해 있던 팀원만 참가해요. 끝나면 결과가 자동으로 보여요.</p></div>`);
+page(`${top()}${timerCard('생성 단계 · 비판 없이, 많이, 자유롭게')}${partsCard()}
 <div class=card>${PR.map(p=>`<span class=chip>${p}</span>`).join('')}<br><br><div class=row><input id=bi placeholder="아이디어를 적고 엔터" style="margin:0"><button class=pri id=bb style="flex:none">추가</button></div></div>
-<div class=card><h3>쏟아진 아이디어</h3><div id=feed></div></div>${hostBtns()}`);
+<div id=egg></div><div class=card><h3>쏟아진 아이디어</h3><div id=feed></div></div>${sigCard()}${hostBtns()}`);
 const add=()=>{const v=$('#bi').value.trim();if(!v)return;addDoc(col('ideas'),{kind:'bs',sid:SID(),uid:U.uid,name:U.displayName||'이름없음',text:v,t:Date.now(),votes:[]});$('#bi').value='';$('#bi').focus()};
-$('#bb').onclick=add;$('#bi').onkeydown=k=>{if(k.key==='Enter')add()};hostWire();feed();online()}
+$('#bb').onclick=add;$('#bi').onkeydown=k=>{if(k.key==='Enter')add()};hostWire();sigWire();feed();online();egg()}
 function feed(){const f=$('#feed');if(!f)return;const l=ideas.filter(d=>d.kind==='bs'&&sd(d)===SID()).sort((a,b)=>b.t-a.t);f.innerHTML=l.map(d=>`<div class=prev><u>${e(nm(d.name))}</u> ${e(d.text)}</div>`).join('')||'<p class=mute>첫 아이디어를 던져봐!</p>'}
-function advance(){if(!R||R.status!=='write')return;(R.mode==='bs'||R.round>=R.settings.rounds)?updateDoc(rref(),{status:'discuss'}):updateDoc(rref(),{round:R.round+1,roundEnd:Date.now()+R.settings.min*60000})}
+function advance(){if(!R||R.status!=='write')return;(R.mode==='bs'||R.round>=R.settings.rounds)?updateDoc(rref(),{status:'lobby'}):updateDoc(rref(),{round:R.round+1,roundEnd:Date.now()+R.settings.min*60000})}
 function tick(){if(!R||R.status!=='write'||!$('#t'))return;const left=Math.max(0,Math.ceil((R.roundEnd-Date.now())/1000));$('#t').textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');$('#pb').style.width=Math.min(100,left/(R.settings.min*60)*100)+'%';
 const k=SID()+'_'+R.round;if(left===0&&!fired[k]){fired[k]=1;saveDom();if(isHost()){const r=R.round;setTimeout(()=>{if(R.round===r&&R.status==='write')advance()},1800)}}}
+
+/* 이스터에그 */
+function egg(){const x=$('#egg');if(!x||!R)return;
+const done=R.mode==='bs'?ideas.filter(d=>d.kind==='bs'&&sd(d)===SID()&&d.uid===U.uid).length>=3:($$('.idea').length>0&&$$('.idea').every(t=>t.value.trim()));
+if(!done){if(x.dataset.on){x.innerHTML='';x.dataset.on=''}return}if(x.dataset.on)return;x.dataset.on=1;
+x.innerHTML=`<div class=card><button class=pk id=eb style="width:100%">🥚 다 썼다면 잠깐 쉬어가기</button><div id=gm></div></div>`;$('#eb').onclick=()=>{const g=$('#gm');g.innerHTML?g.innerHTML='':game(g)}}
+function game(g){let sc=0,pos=-1,end=0,iv;g.innerHTML=`<div class=row style="margin-top:10px"><b id=gs>💡 0</b><b id=gt style="text-align:center">20초</b><button class=pk id=gb>시작</button></div><div class=gg>${Array.from({length:9},()=>'<button></button>').join('')}</div><p class=mute style="margin-top:6px">나타나는 💡을 눌러요. 조용히 놀기!</p>`;
+const cs=$$('.gg button'),clr=()=>cs.forEach(c=>c.textContent='');
+cs.forEach((c,i)=>c.onclick=()=>{if(end&&i===pos){sc++;$('#gs').textContent='💡 '+sc;pos=-1;clr()}});
+$('#gb').onclick=()=>{sc=0;$('#gs').textContent='💡 0';end=Date.now()+20000;clearInterval(iv);iv=setInterval(()=>{if(!$('#gs')){clearInterval(iv);return}const l=Math.ceil((end-Date.now())/1000);if(l<=0){clearInterval(iv);end=0;clr();$('#gt').textContent='끝! '+sc+'점';return}$('#gt').textContent=l+'초';clr();pos=Math.floor(Math.random()*9);cs[pos].textContent='💡'},650)}}
 
 /* 팀 화면 */
 function hub(){curWrite=null;page(`${top()}<div class=tabs><button data-t=ideas>회의</button><button data-t=board>보드</button><button data-t=chat>채팅</button><button data-t=team>팀</button></div><div id=sel></div><div id=pane></div>`);
 $$('.tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;pane()});pane()}
-function sheets(S){return R.members.map((m,i)=>({title:`${i+1}번 시트${R.settings.anon?'':' ('+m.name+')'}`,list:ideas.filter(d=>!d.kind&&d.sheet===m.uid&&sd(d)===S).sort((a,b)=>a.round-b.round)}))}
+function sheets(S){return ptsOf(S).map((m,i)=>({title:`${i+1}번 시트${an(S)?'':' ('+m.name+')'}`,list:ideas.filter(d=>!d.kind&&d.sheet===m.uid&&sd(d)===S).sort((a,b)=>a.round-b.round)}))}
 const bsList=S=>ideas.filter(d=>d.kind==='bs'&&sd(d)===S).sort((a,b)=>(b.votes||[]).length-(a.votes||[]).length||a.t-b.t);
-function bsItem(d,h){return`<div class="prev ${d.pick?'pick':''}"><span class=ac><button class=ghost data-g="${d.id}">분류</button><button class=ghost data-v="${d.id}">♥ ${(d.votes||[]).length}</button>${h?`<button class=ghost data-p="${d.id}">${d.pick?'★':'☆'}</button>`:''}</span><u>${e(nm(d.name))}</u> ${e(d.text)}</div>`}
+const stats=a=>`<div class=stats>${a.map(x=>`<div class=stat><b>${x[1]}</b>${x[0]}</div>`).join('')}</div>`;
+const note=(d,h,S)=>`<div class="note ${d.pick?'pick':''}"><div>${e(d.text)}</div><div class=nf><small>${e(nmS(S,d.name))}</small><span><button class=ghost data-g="${d.id}">분류</button><button class=ghost data-v="${d.id}">♥ ${(d.votes||[]).length}</button>${h?`<button class=ghost data-p="${d.id}">${d.pick?'★':'☆'}</button>`:''}</span></div></div>`;
 function recordHtml(S){if(!S)return'<div class=card><p class=mute>아직 진행한 회의가 없어요.</p></div>';let h='';
-if(mdOf(S)==='bs'){const l=bsList(S),hh=isHost(),pk=l.filter(d=>d.pick);
-h+=pk.length?`<div class=card><h3>★ 최종 채택 (${pk.length})</h3>${pk.map(d=>bsItem(d,hh)).join('')}</div>`:'';
-const gs=[...new Set(l.map(d=>d.g||''))].sort((a,b)=>(!a)-(!b)||a.localeCompare(b));
-h+=`<div class=card><h3>아이디어 ${l.length}개 · '분류'로 묶고, ♥로 투표${hh?', ☆로 채택':''}</h3>${gs.map(g=>`<h3 style="margin-top:10px">${g?'📁 '+e(g):'미분류'}</h3>${l.filter(d=>(d.g||'')===g).map(d=>bsItem(d,hh)).join('')}`).join('')||'<p class=mute>기록 없음</p>'}</div>`}
-else h+=sheets(S).map(s=>`<div class=card><h3>${e(s.title)}</h3>${s.list.map(d=>`<div class=prev><u>R${d.round} ${e(nm(d.name))}</u><br>${d.items.filter(Boolean).map(t=>'· '+e(t)).join('<br>')||'-'}</div>`).join('')||'<p class=mute>기록 없음</p>'}</div>`).join('');
+if(mdOf(S)==='bs'){const l=bsList(S),hh=isHost(),pk=l.filter(d=>d.pick),rest=l.filter(d=>!d.pick);
+h+=stats([['아이디어',l.length],['참여',new Set(l.map(d=>d.uid)).size+'명'],['분류',new Set(l.map(d=>d.g).filter(Boolean)).size+'개'],['채택',pk.length]]);
+h+=`<div class=card><p class=mute>💡 '분류'로 비슷한 것끼리 묶고, ♥로 투표하세요${hh?'. 방장은 ☆로 최종안을 채택해요':''}.</p></div>`;
+if(pk.length)h+=`<div class=card><h3>★ 최종 채택</h3><div class=notes>${pk.map(d=>note(d,hh,S)).join('')}</div></div>`;
+const gs=[...new Set(rest.map(d=>d.g||''))].sort((a,b)=>(!a)-(!b)||a.localeCompare(b));
+h+=gs.map(g=>{const x=rest.filter(d=>(d.g||'')===g);return`<div class=card><h3>${g?'📁 '+e(g):'미분류'} <span class=mute>${x.length}개</span></h3><div class=notes>${x.map(d=>note(d,hh,S)).join('')}</div></div>`}).join('')||(pk.length?'':'<div class=card><p class=mute>기록 없음</p></div>')}
+else{const sh=sheets(S),all=sh.flatMap(s=>s.list.flatMap(d=>d.items.filter(Boolean).map(t=>({t,d}))));
+h+=stats([['아이디어',all.length],['참여',ptsOf(S).length+'명'],['시트',sh.length+'장'],['라운드',Math.max(0,...sh.flatMap(s=>s.list.map(d=>d.round)))]]);
+h+=`<div class=seg><button data-bv=sheet class="${bwv==='sheet'?'on':''}">시트별로 보기</button><button data-bv=all class="${bwv==='all'?'on':''}">전체 모아보기</button></div>`;
+if(bwv==='all')h+=`<div class=card><div class=notes>${all.map(x=>`<div class=note><div>${e(x.t)}</div><small>R${x.d.round} · ${e(nmS(S,x.d.name))}</small></div>`).join('')||'<p class=mute>기록 없음</p>'}</div></div>`;
+else h+=sh.map(s=>`<div class=card><h3>${e(s.title)}</h3>${s.list.map(d=>`<div class=rd><div class=rh><b>R${d.round}</b>${e(nmS(S,d.name))}</div>${d.items.filter(Boolean).map(t=>`<div class=it>${e(t)}</div>`).join('')||'<div class=mute>-</div>'}</div>`).join('')||'<p class=mute>기록 없음</p>'}</div>`).join('')}
 return h}
 function pane(){$$('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));const p=$('#pane');if(!p)return;const S=VS();
-const sl=$('#sel');if(sl){sl.innerHTML=SID()>1&&(tab==='ideas'||tab==='board')?`<select id=vs>${Array.from({length:SID()},(_,i)=>`<option value=${i+1} ${i+1===S?'selected':''}>${i+1}차 · ${e((R.meets&&R.meets[i+1]&&R.meets[i+1].title)||'')}${i+1===SID()?' (최근)':''}</option>`).join('')}</select>`:'';if($('#vs'))$('#vs').onchange=ev=>{vs=+ev.target.value;pane()}}
-if(tab==='ideas'){let h=R.status==='lobby'?meetCard():'<div class=card><p class=mute>토론·정리 단계예요. 분류·투표·채택을 하고, 보드·채팅도 써보세요.</p></div>';
-if(S&&(R.meets&&R.meets[S]))h+=`<h3 style="margin:6px 2px">${S}차 회의 · ${e(R.meets[S].title)} <span class=chip>${mName(mdOf(S))}</span></h3>`;
+const sl=$('#sel');if(sl){sl.innerHTML=SID()>1&&tab==='ideas'?`<select id=vs>${Array.from({length:SID()},(_,i)=>`<option value=${i+1} ${i+1===S?'selected':''}>${i+1}차 · ${e((R.meets&&R.meets[i+1]&&R.meets[i+1].title)||'')}${i+1===SID()?' (최근)':''}</option>`).join('')}</select>`:'';if($('#vs'))$('#vs').onchange=ev=>{vs=+ev.target.value;pane()}}
+if(tab==='ideas'){let h=meetCard();
+if(S&&R.meets&&R.meets[S])h+=`<h3 style="margin:6px 2px 10px">${S}차 회의 · ${e(R.meets[S].title)} <span class=chip>${mName(mdOf(S))}</span></h3>`;
 h+=recordHtml(S);p.innerHTML=h;wireMeet();
 const ref=id=>doc(db,'rooms',code,'ideas',id);
+$$('[data-bv]').forEach(b=>b.onclick=()=>{bwv=b.dataset.bv;pane()});
 $$('[data-v]').forEach(b=>b.onclick=()=>{const d=ideas.find(x=>x.id===b.dataset.v),has=(d.votes||[]).includes(U.uid);updateDoc(ref(d.id),{votes:has?arrayRemove(U.uid):arrayUnion(U.uid)})});
 $$('[data-g]').forEach(b=>b.onclick=()=>{const d=ideas.find(x=>x.id===b.dataset.g),v=prompt('분류 이름 (비우면 해제)',d.g||'');if(v!==null)updateDoc(ref(d.id),{g:v.trim()})});
 $$('[data-p]').forEach(b=>b.onclick=()=>{const d=ideas.find(x=>x.id===b.dataset.p);updateDoc(ref(d.id),{pick:!d.pick})})}
@@ -193,30 +229,29 @@ else boardPane(p)}
 function chatList(){const c=$('#cl');if(!c)return;c.innerHTML=chats.map(m=>`<p><b>${e(m.name)}</b> ${e(m.text||'')}${m.file?fileHtml(m.file):''}</p>`).join('');c.scrollTop=c.scrollHeight}
 const fileHtml=f=>f.mime&&f.mime.startsWith('image/')?`<br><img src="${f.data}" style="max-width:60%;border-radius:8px">`:`<br><a href="${f.data}" download="${e(f.name)}" style="color:var(--pd);font-weight:700">📎 ${e(f.name)} (${Math.round(f.size/1024)}KB)</a>`;
 
-/* 보드 */
-function boardPane(p){if(!VS())return p.innerHTML='<div class=card><p class=mute>회의를 시작하면 이 회의의 화이트보드가 열려요.</p></div>';
-const cs=['#76628f','#d48aa8','#2d2a32','#8e8996'];
-p.innerHTML=`<div class=pal>${cs.map(c=>`<span class=c data-c=${c} style="background:${c}"></span>`).join('')}<button class=ghost id=er>지우개</button><button class=ghost data-m=draw>✏️ 그리기</button><button class=ghost data-m=pan>✋ 화면이동</button><button class=ghost data-m=img>🖼 사진이동</button><button class=ghost id=zo>－</button><button class=ghost id=zi>＋</button><button class=ghost id=ph>사진 추가</button><input type=file id=fl accept="image/*" hidden>${isHost()?'<button class=ghost id=cl2>전체 지우기</button>':''}</div><div id=wrap><div id=bd style="width:${z*100}%"><div id=il></div><canvas id=cv width=1200 height=750></canvas></div></div><p class=mute>사진 위에도 그릴 수 있어요. 사진을 옮기려면 '🖼 사진이동' 모드에서 드래그, 더블클릭(더블탭)으로 삭제. 확대 후 ✋로 바꿔 화면을 밀어요.</p>`;
-$$('.pal span.c').forEach(s=>s.onclick=()=>{color=s.dataset.c;md='draw';applyMd()});$('#er').onclick=()=>{color='erase';md='draw';applyMd()};
-$$('[data-m]').forEach(b=>b.onclick=()=>{md=b.dataset.m;applyMd()});
-const zz=d=>{z=Math.max(1,Math.min(4,z+d));$('#bd').style.width=z*100+'%'};$('#zi').onclick=()=>zz(.5);$('#zo').onclick=()=>zz(-.5);
-$('#ph').onclick=()=>$('#fl').click();$('#fl').onchange=addImg;
-if($('#cl2'))$('#cl2').onclick=async()=>{if(!confirm('이 회의 그림을 모두 지울까?'))return;(await getDocs(col('strokes'))).forEach(d=>{if(sd(d.data())===VS())deleteDoc(d.ref)})};
-board();imgR();applyMd()}
-function applyMd(){const bd=$('#bd');if(!bd)return;bd.classList.toggle('mi',md==='img');$('#cv').style.pointerEvents=md==='draw'?'auto':'none';$$('[data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m===md));$('#er').classList.toggle('on',md==='draw'&&color==='erase')}
-function addImg(ev){const f=ev.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{const k=Math.min(1,500/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);addDoc(col('imgs'),{src:c.toDataURL('image/jpeg',.7),x:.1,y:.1,w:.25,sid:VS()})};im.src=URL.createObjectURL(f)}
-function imgR(){const l=$('#il');if(!l)return;l.innerHTML=imgs.filter(d=>sd(d)===VS()).map(d=>`<img data-id="${d.id}" src="${d.src}" style="left:${d.x*100}%;top:${d.y*100}%;width:${d.w*100}%">`).join('');
-$$('#il img').forEach(m=>{const d=imgs.find(x=>x.id===m.dataset.id);m.ondblclick=()=>deleteDoc(doc(db,'rooms',code,'imgs',d.id));
-m.onpointerdown=ev=>{if(md!=='img')return;ev.preventDefault();m.setPointerCapture(ev.pointerId);const r=$('#bd').getBoundingClientRect(),gx=(ev.clientX-r.left)/r.width-d.x,gy=(ev.clientY-r.top)/r.height-d.y;let mv=false;
-m.onpointermove=e2=>{mv=true;const r2=$('#bd').getBoundingClientRect();m.style.left=Math.max(0,(e2.clientX-r2.left)/r2.width-gx)*100+'%';m.style.top=Math.max(0,(e2.clientY-r2.top)/r2.height-gy)*100+'%'};
-m.onpointerup=()=>{m.onpointermove=m.onpointerup=null;if(mv)updateDoc(doc(db,'rooms',code,'imgs',d.id),{x:parseFloat(m.style.left)/100,y:parseFloat(m.style.top)/100})}}})}
-function draw1(x,s){if(s.pts.length<2)return;const er=s.c==='erase';x.globalCompositeOperation=er?'destination-out':'source-over';x.beginPath();x.strokeStyle=er?'#000':s.c;x.lineWidth=s.w;x.lineCap=x.lineJoin='round';for(let i=0;i<s.pts.length;i+=2)x[i?'lineTo':'moveTo'](s.pts[i]*1200,s.pts[i+1]*750);x.stroke();x.globalCompositeOperation='source-over'}
-function redraw(){const c=$('#cv');if(!c)return;const x=c.getContext('2d');x.clearRect(0,0,1200,750);strokes.filter(s=>sd(s)===VS()).forEach(s=>draw1(x,s));if(cur)draw1(x,cur)}
-function board(){const c=$('#cv');redraw();const pos=ev=>{const r=c.getBoundingClientRect();return[+((ev.clientX-r.left)/r.width).toFixed(4),+((ev.clientY-r.top)/r.height).toFixed(4)]};
-c.onpointerdown=ev=>{ev.preventDefault();c.setPointerCapture(ev.pointerId);cur={pts:pos(ev),c:color,w:(color==='erase'?28:4)/z}};
-c.onpointermove=ev=>{if(!cur)return;ev.preventDefault();cur.pts.push(...pos(ev));redraw()};
-const up=()=>{if(!cur)return;const s=cur;cur=null;if(s.pts.length<4)s.pts.push(s.pts[0]+.001,s.pts[1]);addDoc(col('strokes'),{...s,t:Date.now(),u:U.uid,sid:VS()})};
-c.onpointerup=up;c.onpointercancel=up}
+/* 보드: 발표 */
+const canCtl=()=>R&&R.deck&&(R.deck.by===U.uid||isHost());
+function boardPane(p){const d=R.deck;
+if(!d){p.innerHTML=`<div class=card><h3>🎤 발표하기</h3><p class=mute>PPT는 <b>PDF로 저장</b>(파일 → 내보내기 또는 다른 이름으로 저장 → PDF)해서 올려주세요. PDF 또는 이미지(PNG·JPG 여러 장)를 올릴 수 있고 최대 40장이에요. 올린 사람이 슬라이드를 넘기면 팀원 화면도 똑같이 넘어가요.</p><br><input type=file id=pf accept=".pdf,.ppt,.pptx,image/*" multiple><div class=err id=us></div></div>`;$('#pf').onchange=ev=>upload(ev.target.files);return}
+const ctl=canCtl();
+p.innerHTML=`<div class=card><div class=row><b>🎤 ${e(d.byName)} 발표 중</b><span id=sn class=mute style="text-align:right"></span></div><br><img id=sl alt="">${ctl?`<div class=row style="margin-top:10px"><button id=pv>◀ 이전</button><button class=pri id=nx>다음 ▶</button><button class=ghost id=en>발표 종료</button></div><p class=mute style="margin-top:6px">키보드 ← → 로도 넘길 수 있어요.</p>`:'<p class=mute style="margin-top:8px">발표자가 넘기면 자동으로 따라가요.</p>'}</div>`;
+if(ctl){$('#pv').onclick=()=>go(-1);$('#nx').onclick=()=>go(1);$('#en').onclick=endDeck}slideUpdate()}
+function slideUpdate(){const im=$('#sl');if(!im||!R||!R.deck)return;const s=slides.find(x=>x.deck===R.deck.id&&x.i===R.deck.page);im.src=s?s.src:'';const n=$('#sn');if(n)n.textContent=(R.deck.page+1)+' / '+R.deck.n}
+function go(d){if(!canCtl())return;const np=Math.max(0,Math.min(R.deck.n-1,R.deck.page+d));if(np!==R.deck.page)updateDoc(rref(),{'deck.page':np})}
+async function endDeck(){if(!confirm('발표를 종료할까?'))return;(await getDocs(col('slides'))).forEach(d=>deleteDoc(d.ref));updateDoc(rref(),{deck:null})}
+function loadPdf(){return window.pdfjsLib?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';s.onload=()=>{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';ok()};s.onerror=()=>no(new Error('PDF 변환 도구를 불러오지 못했어'));document.head.append(s)})}
+function shrink(c){let q=.6,u=c.toDataURL('image/jpeg',q);while(u.length>900000&&q>.2){q-=.1;u=c.toDataURL('image/jpeg',q)}return u}
+function imgToUrl(f){return new Promise((ok,no)=>{const im=new Image();im.onload=()=>{const k=Math.min(1,1280/im.width),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);ok(shrink(c))};im.onerror=()=>no(new Error('이미지를 읽지 못했어'));im.src=URL.createObjectURL(f)})}
+async function upload(files){const us=$('#us'),fl=[...files];if(!fl.length)return;
+if(fl.some(f=>/\.pptx?$/i.test(f.name)))return us.textContent='PPT는 브라우저에서 바로 못 열어요. PDF로 저장해서 올려줘';
+try{let pages=[];
+if(fl[0].type==='application/pdf'){await loadPdf();const pdf=await pdfjsLib.getDocument({data:await fl[0].arrayBuffer()}).promise,n=Math.min(pdf.numPages,40);
+for(let i=1;i<=n;i++){us.textContent=`변환 중 ${i}/${n}…`;const pg=await pdf.getPage(i),vp=pg.getViewport({scale:1280/pg.getViewport({scale:1}).width}),c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;pages.push(shrink(c))}}
+else{const im=fl.filter(f=>f.type.startsWith('image/')).slice(0,40);for(const f of im){us.textContent=`변환 중 ${pages.length+1}/${im.length}…`;pages.push(await imgToUrl(f))}}
+if(!pages.length)return us.textContent='올릴 수 있는 파일이 없어';
+us.textContent='올리는 중…';(await getDocs(col('slides'))).forEach(d=>deleteDoc(d.ref));
+const id=String(Date.now());await Promise.all(pages.map((src,i)=>setDoc(doc(db,'rooms',code,'slides',id+'_'+String(i).padStart(2,'0')),{deck:id,i,src})));
+await updateDoc(rref(),{deck:{id,n:pages.length,page:0,by:U.uid,byName:U.displayName||'이름없음'}})}catch(x){if($('#us'))$('#us').textContent=x.message||'업로드에 실패했어'}}
 
 /* 팀 탭: 역할·업무 */
 function team(p){const h=isHost();
@@ -228,10 +263,10 @@ $$('[data-k]').forEach(c=>c.onchange=()=>updateDoc(doc(db,'rooms',code,'tasks',c
 $$('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('이 업무를 삭제할까?'))deleteDoc(doc(db,'rooms',code,'tasks',b.dataset.del))});
 if(h)$('#tb').onclick=()=>{const t=$('#tt2').value.trim();if(!t)return;const m=R.members.find(x=>x.uid===$('#ta').value);addDoc(col('tasks'),{title:t,to:m.uid,toName:m.name,due:$('#td').value,done:false,t:Date.now()})}}
 
-function download(){const L=[`# ${R.team||R.title}`,`팀 코드: ${code}`,`생성: ${new Date(R.created).toLocaleString('ko-KR')}`,`참가자: ${R.members.map(m=>R.settings.anon?'익명':m.name+(m.role?'('+m.role+')':'')).join(', ')}`,''];
-for(let S=1;S<=SID();S++){const mt=R.meets&&R.meets[S];L.push(`## ${S}차 회의: ${mt?mt.title:''} (${mName(mdOf(S))})`,'');
-if(mdOf(S)==='bs'){let g=null;bsList(S).sort((a,b)=>(a.g||'~').localeCompare(b.g||'~')).forEach(d=>{if(d.g!==g){g=d.g;L.push(`[${g||'미분류'}]`)}L.push(`- ${d.pick?'★ ':''}${nm(d.name)}: ${d.text} (♥${(d.votes||[]).length})`)})}
-else sheets(S).forEach(s=>{L.push('### '+s.title);s.list.forEach(d=>{L.push(`[라운드 ${d.round}] ${nm(d.name)}`);d.items.filter(Boolean).forEach(t=>L.push('  - '+t))});L.push('')});
+function download(){const L=[`# ${R.team||R.title}`,`팀 코드: ${code}`,`생성: ${new Date(R.created).toLocaleString('ko-KR')}`,`팀원: ${R.members.map(m=>m.name+(m.role?'('+m.role+')':'')).join(', ')}`,''];
+for(let S=1;S<=SID();S++){const mt=R.meets&&R.meets[S];L.push(`## ${S}차 회의: ${mt?mt.title:''} (${mName(mdOf(S))})`,`참가자: ${ptsOf(S).map(m=>an(S)?'익명':m.name).join(', ')}`,'');
+if(mdOf(S)==='bs'){let g=null;bsList(S).sort((a,b)=>(a.g||'~').localeCompare(b.g||'~')).forEach(d=>{if(d.g!==g){g=d.g;L.push(`[${g||'미분류'}]`)}L.push(`- ${d.pick?'★ ':''}${nmS(S,d.name)}: ${d.text} (♥${(d.votes||[]).length})`)})}
+else sheets(S).forEach(s=>{L.push('### '+s.title);s.list.forEach(d=>{L.push(`[라운드 ${d.round}] ${nmS(S,d.name)}`);d.items.filter(Boolean).forEach(t=>L.push('  - '+t))});L.push('')});
 L.push('')}
 L.push('## 업무','');tasks.forEach(t=>L.push(`- [${t.done?'x':' '}] ${t.title} → ${t.toName}${t.due?' (기한 '+t.due+')':''}`));
 L.push('','## 채팅','');chats.forEach(m=>L.push(`${new Date(m.t).toLocaleString('ko-KR')} ${m.name}: ${m.text||''}${m.file?' (파일: '+m.file.name+')':''}`));
