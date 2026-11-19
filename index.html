@@ -21,30 +21,27 @@ input,textarea,select{font:inherit;width:100%;padding:10px 12px;border:2px solid
 input:focus,textarea:focus{outline:none;border-color:var(--p)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>*{flex:1}.row.nf>*{flex:none}
 .big{display:grid;grid-template-columns:1fr 1fr;gap:12px}.big button{padding:26px 10px;font-size:17px}
-.code{font-size:34px;letter-spacing:6px;font-weight:800;color:var(--pd);text-align:center;background:var(--pl);border-radius:14px;padding:10px}
 .chip{display:inline-block;background:var(--pl);color:var(--pd);border-radius:20px;padding:5px 12px;margin:3px;font-weight:700;font-size:14px}
 .mute{color:var(--mute);font-size:14px}.err{color:#b4506f;font-size:14px;min-height:20px}
 .timer{font-size:40px;font-weight:800;color:var(--pd);text-align:center}
 .bar{height:8px;background:var(--line);border-radius:8px;overflow:hidden}.bar b{display:block;height:100%;background:var(--p)}
 .prev{background:var(--pl);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:14px;overflow:hidden}.prev u{text-decoration:none;font-weight:700;color:var(--pd)}.prev.pick{background:var(--pk)}
 .prev .ac{float:right;display:flex;gap:4px}.prev .ac button{padding:2px 8px;font-size:13px}
-.tabs,.subs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;border-color:var(--line);padding:9px 4px}.tabs .on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.subs{flex-wrap:wrap}.subs button{padding:6px 12px;font-size:14px;border-color:var(--line)}
+.tabs{display:flex;gap:6px;margin-bottom:12px}.tabs button{flex:1;border-color:var(--line);padding:9px 4px}.tabs .on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .hist{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:2px solid var(--line);cursor:pointer}
 #wrap{overflow:auto;max-height:62vh;border:2px solid var(--line);border-radius:14px;background:#fff;overscroll-behavior:contain}
 #bd{position:relative;width:100%}#cv{width:100%;aspect-ratio:16/10;display:block;touch-action:none;position:relative;z-index:1}
-#il{position:absolute;inset:0;z-index:0}#il img{position:absolute;pointer-events:none;border-radius:6px;border:2px solid var(--pk)}
+#il{position:absolute;inset:0;z-index:0}#il img{position:absolute;pointer-events:none;border:0;outline:0}
 #bd.mi #il img{pointer-events:auto;touch-action:none;cursor:move}
 .pal{display:flex;gap:8px;margin:8px 0;align-items:center;flex-wrap:wrap}.pal span.c{width:28px;height:28px;border-radius:50%;border:3px solid var(--line);cursor:pointer}.pal button{padding:5px 10px;font-size:14px}
-.tw{overflow:auto;margin-bottom:8px}table{border-collapse:collapse;width:100%}td{border:2px solid var(--line);padding:0}td input{border:0;margin:0;border-radius:0;min-width:90px}tr:first-child td input{font-weight:800;background:var(--pl)}
-.chat{height:300px;overflow:auto;background:var(--pl);border-radius:12px;padding:10px;margin-bottom:8px}.chat p{margin-bottom:6px;font-size:15px}
+.chat{height:340px;overflow:auto;background:var(--pl);border-radius:12px;padding:10px;margin-bottom:8px}.chat p{margin-bottom:8px;font-size:15px}
 .modal{position:fixed;inset:0;background:#2d2a3299;display:flex;align-items:center;justify-content:center;padding:18px;z-index:9}.modal .card{max-width:480px;max-height:85vh;overflow:auto;margin:0;width:100%}
 .modal li{margin:0 0 8px 18px;font-size:15px}
 .pick span{display:inline-block;font-size:26px;padding:4px 8px;border-radius:12px;cursor:pointer;border:2px solid transparent}.pick span.on{border-color:var(--pd);background:var(--pl)}
 .task{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:2px solid var(--line)}.task input{width:20px;margin:0;flex:none}.task button{margin-left:auto;padding:2px 8px;font-size:13px}.done{text-decoration:line-through;color:var(--mute)}
-@media(max-width:520px){.big{grid-template-columns:1fr}.timer{font-size:34px}.code{font-size:28px}}
+@media(max-width:520px){.big{grid-template-columns:1fr}.timer{font-size:34px}}
 </style></head><body>
-<header><div class="logo"><i></i>브레인라이팅</div><div class="row nf"><button class="ghost" id="dl2" style="display:none" title="회의 기록 저장">⬇ 저장</button><button class="ghost" id="more">더보기</button><button class="ghost" id="out" style="display:none">로그아웃</button></div></header>
+<header><div class="logo"><i></i>브레인라이팅</div><div class="row nf"><button class="ghost" id="mn" style="display:none">⋯ 메뉴</button><button class="ghost" id="more">더보기</button><button class="ghost" id="out" style="display:none">로그아웃</button></div></header>
 <main id="main"></main>
 <script>setTimeout(function(){var m=document.getElementById('main');if(!m.innerHTML.trim())m.innerHTML='<div class=card><h2>화면이 안 뜨네?</h2><p>파일을 더블클릭해서 열면 Firebase가 막혀. 버셀 주소(또는 로컬 서버)로 열고, firebaseConfig도 확인해줘.</p></div>'},2500)</script>
 <script type="module">
@@ -58,21 +55,27 @@ const app0=initializeApp(firebaseConfig),auth=getAuth(app0),db=getFirestore(app0
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const e=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ICONS=['🙂','🦊','🐱','🐻','🐰','🌷','🍀','⭐'],COLORS=['#9d88b8','#d48aa8','#8e8996','#76628f','#c79ab0','#5f5a66'];
-let U=null,code=null,R=null,ideas=[],chats=[],strokes=[],imgs=[],tasks=[],boards=[],pres={},unsubs=[],viewKey='',tab='ideas',timerI=null,beatI=null,curWrite=null,hist=[],fired={},saveT=null,color='#76628f',P={icon:'🙂',color:'#9d88b8'},vs=0,z=1,md='draw',bsel='wb',cur=null;
+let U=null,code=null,R=null,ideas=[],chats=[],strokes=[],imgs=[],tasks=[],pres={},unsubs=[],viewKey='',tab='ideas',timerI=null,beatI=null,curWrite=null,hist=[],fired={},saveT=null,color='#76628f',P={icon:'🙂',color:'#9d88b8'},vs=0,z=1,md='draw',cur=null,dr={title:'',mode:'bw',min:5,count:3,rounds:5,anon:false};
 const page=h=>{$('#main').innerHTML=h};
 const rref=()=>doc(db,'rooms',code),col=n=>collection(db,'rooms',code,n);
 const nm=n=>R.settings.anon?'익명':n;
-const SID=()=>R.sid||1,VS=()=>vs||SID();
+const SID=()=>R.sid||0,VS=()=>vs||SID(),sd=d=>d.sid||0;
+const mdOf=S=>(R.meets&&R.meets[S]&&R.meets[S].mode)||R.mode;
+const mName=m=>m==='bs'?'브레인스토밍':'브레인라이팅';
 const me=()=>({uid:U.uid,name:U.displayName||'이름없음',icon:P.icon,color:P.color});
 const chip=m=>`<span class=chip style="background:${m.color||'#9d88b8'}33"><span>${m.icon||''}</span> ${e(m.name)}${R&&m.uid===R.host?' 👑':''}</span>`;
 const PR=['비판 보류','질보다 양','자유로운 분위기','결합·개선'];
 const STEPS=['준비','생성','토론·분류','선택'];
-const stepIdx=()=>({lobby:0,write:1,discuss:2,done:3}[R.status]);
-const top=()=>`<div class=topic><small>주제</small><b>${e(R.title)}</b> <span class=chip>${R.mode==='bs'?'브레인스토밍':'브레인라이팅'}</span>${R.mode==='bs'?`<div class=steps>${STEPS.map((s,i)=>`<span class="${i===stepIdx()?'on':''}">${i+1}. ${s}</span>`).join('')}</div>`:''}<div id=on class=mute style="color:#bdb6c9"></div></div>`;
+const stepIdx=()=>R.status==='write'?1:(ideas.some(d=>d.pick&&sd(d)===SID())?3:2);
+const isHost=()=>R&&R.host===U.uid;
+const top=()=>{const m=R.status!=='lobby';return`<div class=topic><small>${e(R.team||R.title)}${m?' · 주제':' · 팀 코드 '+code}</small><b>${m?e(R.title):e(R.team||R.title)}</b>${m?` <span class=chip>${mName(R.mode)}</span>`:''}${m&&R.mode==='bs'?`<div class=steps>${STEPS.map((s,i)=>`<span class="${i===stepIdx()?'on':''}">${i+1}. ${s}</span>`).join('')}</div>`:''}<div id=on class=mute style="color:#bdb6c9"></div></div>`};
 
-$('#more').onclick=()=>{const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class=card><h2>이 서비스는?</h2><p class=mute>모둠 회의에서 정적이 흐를 때, 아이디어 내기 절차를 차근차근 안내해줘요.</p><br><h3>브레인라이팅</h3><ol><li>방장이 방을 만들고 코드를 공유해요.</li><li>정해진 시간 동안 아이디어를 적어요. 대화 금지!</li><li>시간이 끝나면 내 시트가 옆 사람에게 넘어가요.</li><li>받은 시트를 읽고 보완·발전시켜 적어요.</li><li>정해진 횟수만큼 반복한 뒤 토론해요.</li></ol><h3>브레인스토밍</h3><ol><li>준비: 주제·목표를 정하고 4대 원칙을 확인해요.</li><li>생성: 비판 없이, 양 위주로, 자유롭게, 서로의 아이디어를 결합해요.</li><li>토론·분류: 비슷한 것끼리 '분류'로 묶고 다듬어요.</li><li>선택: ♥ 투표 후 방장이 ★로 최종안을 채택해요.</li></ol><br><p class=mute>토론에서는 보드(화이트보드·표·파일)·채팅·팀 업무를 쓰고, 모든 기록은 방에 남아 txt로 저장돼요. 같은 팀이 여러 번 회의하면 1차, 2차… 로 구분돼요.</p><br><button class=pri id=x style="width:100%">닫기</button></div>`;document.body.append(m);m.onclick=ev=>{if(ev.target===m||ev.target.id==='x')m.remove()}};
+$('#more').onclick=()=>{const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class=card><h2>이 서비스는?</h2><p class=mute>모둠 회의에서 정적이 흐를 때, 아이디어 내기 절차를 차근차근 안내해줘요.</p><br><h3>팀</h3><ol><li>방장이 팀을 만들고 코드를 공유해요.</li><li>팀원이 코드로 들어오면 팀 안에서 채팅, 업무, 회의를 함께 해요.</li><li>방장이 원할 때마다 브레인라이팅/브레인스토밍 회의를 새로 시작해요(1차, 2차…).</li></ol><h3>브레인라이팅</h3><ol><li>정해진 시간 동안 아이디어를 적어요. 대화 금지!</li><li>시간이 끝나면 내 시트가 옆 사람에게 넘어가요.</li><li>받은 시트를 읽고 보완·발전시켜 적어요.</li><li>정해진 횟수만큼 반복한 뒤 토론해요.</li></ol><h3>브레인스토밍</h3><ol><li>준비: 주제·목표를 정하고 4대 원칙을 확인해요.</li><li>생성: 비판 없이, 양 위주로, 자유롭게, 서로의 아이디어를 결합해요.</li><li>토론·분류: 비슷한 것끼리 '분류'로 묶고 다듬어요.</li><li>선택: ♥ 투표 후 방장이 ★로 최종안을 채택해요.</li></ol><br><p class=mute>모든 기록은 팀에 남고, 오른쪽 위 ⋯ 메뉴에서 txt로 저장할 수 있어요.</p><br><button class=pri id=x style="width:100%">닫기</button></div>`;document.body.append(m);m.onclick=ev=>{if(ev.target===m||ev.target.id==='x')m.remove()}};
 $('#out').onclick=()=>signOut(auth);
-$('#dl2').onclick=()=>R&&download();
+$('#mn').onclick=()=>{if(!R)return;const h=isHost(),m=document.createElement('div');m.className='modal';m.innerHTML=`<div class=card><h2>메뉴</h2><div style="display:grid;gap:8px"><button id=m1>⬇ 회의 기록 저장</button><button id=m2>🏠 홈으로</button>${h&&R.status!=='lobby'?'<button class=pk id=m3>현재 회의 종료</button>':''}<button class=ghost id=m4>팀 나가기</button><button class=ghost id=m5>닫기</button></div></div>`;document.body.append(m);
+m.onclick=ev=>{if(ev.target===m)m.remove()};$('#m5').onclick=()=>m.remove();
+$('#m1').onclick=()=>{m.remove();download()};$('#m2').onclick=()=>{m.remove();leave()};$('#m4').onclick=()=>{m.remove();exitRoom()};
+if($('#m3'))$('#m3').onclick=()=>{m.remove();if(confirm('현재 회의를 종료할까? 기록은 그대로 남아.'))updateDoc(rref(),{status:'lobby'})}};
 const showErr=m=>{$('#main').innerHTML=`<div class=card><h2>앗, 오류가 났어</h2><p class=err style="white-space:pre-wrap">${e(m)}</p></div>`};
 window.addEventListener('unhandledrejection',x=>showErr(x.reason?.message||x.reason));
 setTimeout(()=>{if(!U&&!code)authView()},0);
@@ -80,7 +83,7 @@ setTimeout(()=>{if(!U&&!code)authView()},0);
 /* 인증 */
 onAuthStateChanged(auth,async u=>{U=u;$('#out').style.display=u?'':'none';if(u)await loadHist();view()});
 function view(){if(!U)return authView();if(!code)return home();roomRender()}
-function authView(){let mode='in';const draw=()=>{page(`<div class=card><h2>${mode==='in'?'로그인':'회원가입'}</h2>${mode==='up'?'<input id=nm placeholder="이름(방에 표시돼요)">':''}<input id=em type=email placeholder="이메일"><input id=pw type=password placeholder="비밀번호(6자 이상)"><div class=err id=er></div><button class=pri id=go style="width:100%">${mode==='in'?'로그인':'가입하기'}</button><button id=gg style="width:100%;margin-top:8px">Google로 계속하기</button><p class=mute style="margin-top:12px;text-align:center"><a href=# id=sw style="color:var(--pd)">${mode==='in'?'처음이라면 회원가입':'이미 계정이 있어요'}</a></p></div>`);
+function authView(){let mode='in';const draw=()=>{page(`<div class=card><h2>${mode==='in'?'로그인':'회원가입'}</h2>${mode==='up'?'<input id=nm placeholder="이름(팀에 표시돼요)">':''}<input id=em type=email placeholder="이메일"><input id=pw type=password placeholder="비밀번호(6자 이상)"><div class=err id=er></div><button class=pri id=go style="width:100%">${mode==='in'?'로그인':'가입하기'}</button><button id=gg style="width:100%;margin-top:8px">Google로 계속하기</button><p class=mute style="margin-top:12px;text-align:center"><a href=# id=sw style="color:var(--pd)">${mode==='in'?'처음이라면 회원가입':'이미 계정이 있어요'}</a></p></div>`);
 $('#sw').onclick=ev=>{ev.preventDefault();mode=mode==='in'?'up':'in';draw()};
 $('#gg').onclick=async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(x){$('#er').textContent=x.message.replace('Firebase: ','')}};
 $('#go').onclick=async()=>{try{if(mode==='in')await signInWithEmailAndPassword(auth,$('#em').value,$('#pw').value);else{const n=$('#nm').value.trim();if(!n)throw{message:'이름을 입력해줘'};const c=await createUserWithEmailAndPassword(auth,$('#em').value,$('#pw').value);await updateProfile(c.user,{displayName:n});U=auth.currentUser;await loadHist();view()}}catch(x){$('#er').textContent=x.message.replace('Firebase: ','')}}};draw()}
@@ -88,157 +91,149 @@ $('#go').onclick=async()=>{try{if(mode==='in')await signInWithEmailAndPassword(a
 /* 홈 */
 async function loadHist(){try{const u=await getDoc(doc(db,'users',U.uid));if(u.exists())P={...P,...u.data()}}catch(x){}
 try{const s=await getDocs(query(collection(db,'rooms'),where('memberIds','array-contains',U.uid)));hist=s.docs.map(d=>({code:d.id,...d.data()})).sort((a,b)=>b.created-a.created)}catch(x){hist=[]}}
-const stName={lobby:'대기중',write:'진행중',discuss:'토론중',done:'종료'};
-function home(){page(`<div class=card><div class=row><h2>${P.icon} 안녕, ${e(U.displayName||'')}</h2><button class=ghost id=pf style="flex:none">프로필</button></div><div class=big><button class=pri id=mk>방 만들기</button><button id=jn>방 입장하기</button></div><div id=box style="margin-top:12px"></div></div><div class=card><h3>내 회의 기록</h3>${hist.length?hist.map(h=>`<div class=hist data-c="${h.code}"><div><b>${e(h.title)}</b><div class=mute>${new Date(h.created).toLocaleDateString('ko-KR')} · ${h.code} · ${h.mode==='bs'?'브레인스토밍':'브레인라이팅'}</div></div><span class=chip>${stName[h.status]}</span></div>`).join(''):'<p class=mute>아직 참여한 회의가 없어요.</p>'}</div>`);
+const stName={lobby:'대기',write:'회의 중',discuss:'토론 중',done:'대기'};
+function home(){page(`<div class=card><div class=row><h2>${P.icon} 안녕, ${e(U.displayName||'')}</h2><button class=ghost id=pf style="flex:none">프로필</button></div><div class=big><button class=pri id=mk>팀 만들기</button><button id=jn>팀 입장하기</button></div><div id=box style="margin-top:12px"></div></div><div class=card><h3>내 팀</h3>${hist.length?hist.map(h=>`<div class=hist data-c="${h.code}"><div><b>${e(h.team||h.title)}</b><div class=mute>${new Date(h.created).toLocaleDateString('ko-KR')} · ${h.code} · ${h.memberIds.length}명 · 회의 ${h.sid||0}회</div></div><span class=chip>${stName[h.status]||''}</span></div>`).join(''):'<p class=mute>아직 참여한 팀이 없어요.</p>'}</div>`);
 $$('.hist').forEach(h=>h.onclick=()=>enter(h.dataset.c));$('#pf').onclick=profile;
-$('#mk').onclick=()=>{$('#box').innerHTML='<input id=ti placeholder="회의 주제"><select id=md><option value=bw>브레인라이팅 (말없이 돌려쓰기)</option><option value=bs>브레인스토밍 (실시간 자유 발상)</option></select><button class=pri id=ok style="width:100%">만들기</button>';$('#ok').onclick=create};
-$('#jn').onclick=()=>{$('#box').innerHTML='<input id=cd placeholder="입장 코드 6자리" maxlength=6 style="text-transform:uppercase"><div class=err id=er></div><button class=pri id=ok style="width:100%">입장</button>';$('#ok').onclick=join}}
+$('#mk').onclick=()=>{$('#box').innerHTML='<input id=ti placeholder="팀 이름"><button class=pri id=ok style="width:100%">만들기</button>';$('#ok').onclick=create};
+$('#jn').onclick=()=>{$('#box').innerHTML='<input id=cd placeholder="팀 코드 6자리" maxlength=6 style="text-transform:uppercase"><div class=err id=er></div><button class=pri id=ok style="width:100%">입장</button>';$('#ok').onclick=join}}
 function profile(){const m=document.createElement('div');m.className='modal';let ic=P.icon,cl=P.color;m.innerHTML=`<div class=card><h2>내 프로필</h2><input id=pn value="${e(U.displayName||'')}" placeholder="이름"><h3>아이콘</h3><div class=pick id=pi>${ICONS.map(i=>`<span data-i=${i} class="${i===ic?'on':''}">${i}</span>`).join('')}</div><h3>대표 색</h3><div class=pick id=pc>${COLORS.map(c=>`<span data-c=${c} class="${c===cl?'on':''}" style="background:${c};width:34px;height:34px;padding:0"></span>`).join('')}</div><br><button class=pri id=sv style="width:100%">저장</button></div>`;document.body.append(m);
 const pick=(id,k,f)=>$$('#'+id+' span').forEach(s=>s.onclick=()=>{f(s.dataset[k]);$$('#'+id+' span').forEach(x=>x.classList.toggle('on',x===s))});pick('pi','i',v=>ic=v);pick('pc','c',v=>cl=v);
 m.onclick=ev=>{if(ev.target===m)m.remove()};
 $('#sv').onclick=async()=>{const n=$('#pn').value.trim();if(n&&n!==U.displayName)await updateProfile(auth.currentUser,{displayName:n});P={icon:ic,color:cl};await setDoc(doc(db,'users',U.uid),P);m.remove();home()}}
-async function create(){const c=Math.random().toString(36).slice(2,8).toUpperCase();
-await setDoc(doc(db,'rooms',c),{title:$('#ti').value.trim()||'우리 팀 회의',mode:$('#md').value,host:U.uid,status:'lobby',round:0,roundEnd:0,sid:1,created:Date.now(),settings:{min:5,count:3,rounds:5,anon:false},members:[me()],memberIds:[U.uid]});enter(c)}
+async function create(){const c=Math.random().toString(36).slice(2,8).toUpperCase(),t=$('#ti').value.trim()||'우리 팀';
+await setDoc(doc(db,'rooms',c),{team:t,title:'',mode:'bw',host:U.uid,status:'lobby',round:0,roundEnd:0,sid:0,meets:{},created:Date.now(),settings:{min:5,count:3,rounds:5,anon:false},members:[me()],memberIds:[U.uid]});enter(c)}
 async function join(){const c=$('#cd').value.trim().toUpperCase(),s=await getDoc(doc(db,'rooms',c||'-'));if(!s.exists())return $('#er').textContent='없는 코드야';const d=s.data();
-if(!d.memberIds.includes(U.uid)){if(d.status!=='lobby')return $('#er').textContent='이미 시작된 방이야';await updateDoc(s.ref,{members:arrayUnion(me()),memberIds:arrayUnion(U.uid)})}enter(c)}
+if(!d.memberIds.includes(U.uid)){if(d.status==='write')return $('#er').textContent='회의가 진행 중이야. 끝난 뒤에 입장해줘';await updateDoc(s.ref,{members:arrayUnion(me()),memberIds:arrayUnion(U.uid)})}enter(c)}
 
-/* 방 */
-function enter(c){code=c;R=null;ideas=[];chats=[];strokes=[];imgs=[];tasks=[];boards=[];pres={};viewKey='';tab='ideas';curWrite=null;fired={};vs=0;bsel='wb';md='draw';$('#dl2').style.display='';
+/* 팀 */
+function enter(c){code=c;R=null;ideas=[];chats=[];strokes=[];imgs=[];tasks=[];pres={};viewKey='';tab='ideas';curWrite=null;fired={};vs=0;md='draw';dr={title:'',mode:'bw',min:5,count:3,rounds:5,anon:false};$('#mn').style.display='';
 unsubs=[onSnapshot(rref(),s=>{if(!s.exists())return leave();const nd=s.data();if(curWrite&&R&&R.status==='write'&&(nd.round!==R.round||nd.status!=='write'||nd.sid!==R.sid))saveDom();R=nd;roomRender()}),
-onSnapshot(col('ideas'),s=>{ideas=s.docs.map(d=>({id:d.id,...d.data()}));if(!R)return;if(R.status==='write'){if(R.mode==='bs')feed();else{const p=$('#prev');if(p)p.innerHTML=prevHtml();const mine=ideas.find(d=>d.id===SID()+'_'+R.round+'_'+U.uid);if(mine)$$('.idea').forEach((t,i)=>{if(!t.value&&mine.items[i])t.value=mine.items[i]})}}else if(tab==='ideas')pane()}),
+onSnapshot(col('ideas'),s=>{ideas=s.docs.map(d=>({id:d.id,...d.data()}));if(!R)return;if(R.status==='write'){if(R.mode==='bs')feed();else{const p=$('#prev');if(p)p.innerHTML=prevHtml();const mine=ideas.find(d=>d.id===SID()+'_'+R.round+'_'+U.uid);if(mine)$$('.idea').forEach((t,i)=>{if(!t.value&&mine.items[i])t.value=mine.items[i]})}}else if(tab==='ideas'&&!(document.activeElement&&document.activeElement.tagName==='INPUT'))pane()}),
 onSnapshot(query(col('messages'),orderBy('t')),s=>{chats=s.docs.map(d=>d.data());if(tab==='chat')chatList()}),
-onSnapshot(query(col('strokes'),orderBy('t')),s=>{strokes=s.docs.map(d=>d.data());if(tab==='board'&&bsel==='wb')redraw()}),
-onSnapshot(col('imgs'),s=>{imgs=s.docs.map(d=>({id:d.id,...d.data()}));if(tab==='board'&&bsel==='wb')imgR()}),
-onSnapshot(col('boards'),s=>{boards=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>a.t-b.t);const a=document.activeElement;if(tab==='board'&&!(a&&a.tagName==='INPUT'&&$('#bpane')&&$('#bpane').contains(a)))pane()}),
-onSnapshot(col('tasks'),s=>{tasks=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.due||'9').localeCompare(b.due||'9'));if(tab==='team'&&R.status!=='write'&&R.status!=='lobby')pane()}),
+onSnapshot(query(col('strokes'),orderBy('t')),s=>{strokes=s.docs.map(d=>d.data());if(tab==='board')redraw()}),
+onSnapshot(col('imgs'),s=>{imgs=s.docs.map(d=>({id:d.id,...d.data()}));if(tab==='board')imgR()}),
+onSnapshot(col('tasks'),s=>{tasks=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.due||'9').localeCompare(b.due||'9'));if(tab==='team'&&R&&R.status!=='write')pane()}),
 onSnapshot(col('presence'),s=>{pres={};s.docs.forEach(d=>pres[d.id]=d.data());online()})];
 const beat=()=>code&&setDoc(doc(db,'rooms',code,'presence',U.uid),{t:Date.now()}).catch(()=>{});beat();clearInterval(beatI);beatI=setInterval(()=>{beat();online()},15000);
 clearInterval(timerI);timerI=setInterval(tick,500)}
 function online(){const o=$('#on');if(!o||!R)return;const l=R.members.filter(m=>pres[m.uid]&&Date.now()-pres[m.uid].t<40000);o.textContent='● 접속 중 '+l.length+'명: '+l.map(m=>m.name).join(', ')}
-async function leave(){unsubs.forEach(f=>f());unsubs=[];clearInterval(timerI);clearInterval(beatI);code=null;R=null;curWrite=null;$('#dl2').style.display='none';await loadHist();view()}
-async function exitRoom(){if(!confirm('이 회의에서 완전히 나갈까? 내 회의 목록에서도 사라져. (내가 남긴 기록은 방에 남아)'))return;
+async function leave(){unsubs.forEach(f=>f());unsubs=[];clearInterval(timerI);clearInterval(beatI);code=null;R=null;curWrite=null;$('#mn').style.display='none';await loadHist();view()}
+async function exitRoom(){if(!confirm('이 팀에서 완전히 나갈까? 내 팀 목록에서도 사라져. (내가 남긴 기록은 팀에 남아)'))return;
 const ms=R.members.filter(m=>m.uid!==U.uid),up={members:ms,memberIds:R.memberIds.filter(i=>i!==U.uid)};if(R.host===U.uid&&ms.length)up.host=ms[0].uid;
 const rf=rref();unsubs.forEach(f=>f());unsubs=[];await updateDoc(rf,up);leave()}
-const isHost=()=>R&&R.host===U.uid;
-function roomRender(){if(!R)return;const key=[R.status,R.round,R.mode,R.title,SID(),R.memberIds.length,JSON.stringify(R.settings)].join('|');if(key===viewKey)return;viewKey=key;R.status==='lobby'?lobby():R.status==='write'?(R.mode==='bs'?writeBs():write()):discuss();online()}
+function roomRender(){if(!R)return;const key=[R.status,R.round,R.mode,R.title,R.team,SID(),R.memberIds.length,JSON.stringify(R.settings)].join('|');if(key===viewKey)return;viewKey=key;R.status==='write'?(R.mode==='bs'?writeBs():write()):hub();online()}
 
-function lobby(){vs=0;const s=R.settings,h=isHost(),bs=R.mode==='bs';page(`${top()}<div class=card><p class=mute>친구들에게 이 코드를 알려줘${SID()>1?' · 지금은 '+SID()+'차 회의 준비 중':''}</p><div class=code>${code}</div></div>
-<div class=card><h3>참가자 ${R.members.length}명</h3>${R.members.map(chip).join('')}</div>
-${bs?`<div class=card><h3>준비 단계 · 4대 원칙</h3>${PR.map(p=>`<span class=chip>${p}</span>`).join('')}<p class=mute style="margin-top:8px">주제와 목표를 확인했다면 방장이 시작해요.</p></div>`:''}
-<div class=card><h3>방장 설정</h3>
-${h?`<input id=tt value="${e(R.title)}" placeholder="주제"><select id=mo><option value=bw ${bs?'':'selected'}>브레인라이팅</option><option value=bs ${bs?'selected':''}>브레인스토밍</option></select>`:''}
-<div class=row><label class=mute>시간(분)<input id=sm type=number min=1 max=60 value=${s.min} ${h?'':'disabled'}></label>${bs?'':`<label class=mute>시트당 개수<input id=sc type=number min=1 max=10 value=${s.count} ${h?'':'disabled'}></label><label class=mute>반복 횟수<input id=sr type=number min=1 max=12 value=${s.rounds} ${h?'':'disabled'}></label>`}</div>
-<label class=row style="gap:8px"><input type=checkbox id=sa ${s.anon?'checked':''} ${h?'':'disabled'} style="width:20px;margin:0;flex:none"> 익명으로 진행</label></div>
-<div class=row><button class=ghost id=lv>홈으로</button><button class=ghost id=xt>회의 나가기</button>${h?'<button class=pri id=st>시작하기</button>':''}</div>${h?'':'<p class=mute style="text-align:center;margin-top:10px">방장이 시작하길 기다리는 중…</p>'}`);
-$('#lv').onclick=leave;$('#xt').onclick=exitRoom;if(!h)return;
-const g=i=>$(i)?+$(i).value:0;
-const sv=()=>updateDoc(rref(),{title:$('#tt').value.trim()||R.title,mode:$('#mo').value,settings:{min:g('#sm')||5,count:g('#sc')||R.settings.count,rounds:g('#sr')||R.settings.rounds,anon:$('#sa').checked}});
-['#tt','#mo','#sm','#sc','#sr','#sa'].forEach(i=>$(i)&&($(i).onchange=sv));
-$('#st').onclick=async()=>{await sv();updateDoc(rref(),{status:'write',round:1,roundEnd:Date.now()+(g('#sm')||5)*60000})}}
+/* 회의 시작 카드 */
+function meetCard(){const h=isHost(),bs=dr.mode==='bs',mem=`<div style="margin-top:6px">${R.members.map(chip).join('')}</div>`;
+if(!h)return`<div class=card><h3>새 회의</h3><p class=mute>방장이 새 회의를 시작하길 기다리는 중… 시작하면 화면이 자동으로 바뀌어요.</p>${mem}</div>`;
+return`<div class=card><h3>새 회의 시작 (${SID()+1}차)</h3><input id=mt value="${e(dr.title)}" placeholder="회의 주제"><select id=mo><option value=bw ${bs?'':'selected'}>브레인라이팅 (말없이 돌려쓰기)</option><option value=bs ${bs?'selected':''}>브레인스토밍 (실시간 자유 발상)</option></select>
+${bs?`<div style="margin-bottom:8px">${PR.map(p=>`<span class=chip>${p}</span>`).join('')}</div>`:''}
+<div class=row><label class=mute>시간(분)<input id=sm type=number min=1 max=60 value=${dr.min}></label>${bs?'':`<label class=mute>시트당 개수<input id=sc type=number min=1 max=10 value=${dr.count}></label><label class=mute>반복 횟수<input id=sr type=number min=1 max=12 value=${dr.rounds}></label>`}</div>
+<label class=row style="gap:8px;margin-bottom:10px"><input type=checkbox id=sa ${dr.anon?'checked':''} style="width:20px;margin:0;flex:none"> 익명으로 진행</label>
+<button class=pri id=st style="width:100%">시작하기</button>${mem}</div>`}
+function wireMeet(){if(!isHost()||!$('#st'))return;
+const sync=()=>{dr.title=$('#mt').value;dr.min=+$('#sm').value||5;if($('#sc')){dr.count=+$('#sc').value||3;dr.rounds=+$('#sr').value||5}dr.anon=$('#sa').checked};
+['#mt','#sm','#sc','#sr','#sa'].forEach(i=>$(i)&&($(i).oninput=sync));
+$('#mo').onchange=()=>{sync();dr.mode=$('#mo').value;pane()};
+$('#st').onclick=()=>{sync();if(R.status!=='lobby')return;const m=SID()+1,t=dr.title.trim()||m+'차 회의';
+updateDoc(rref(),{status:'write',sid:m,title:t,mode:dr.mode,round:1,roundEnd:Date.now()+dr.min*60000,settings:{min:dr.min,count:dr.count,rounds:dr.rounds,anon:dr.anon},['meets.'+m]:{title:t,mode:dr.mode}});dr.title=''}}
 
+/* 라이팅 */
 function owner(){const n=R.members.length,i=R.members.findIndex(m=>m.uid===U.uid);return i<0?null:{i,o:R.members[((i-(R.round-1))%n+n)%n],n}}
-function prevHtml(){const w=owner();if(!w)return'';const p=ideas.filter(d=>!d.kind&&(d.sid||1)===SID()&&d.sheet===w.o.uid&&d.round<R.round).sort((a,b)=>a.round-b.round);
+function prevHtml(){const w=owner();if(!w)return'';const p=ideas.filter(d=>!d.kind&&sd(d)===SID()&&d.sheet===w.o.uid&&d.round<R.round).sort((a,b)=>a.round-b.round);
 return p.length?p.map(d=>`<div class=prev><u>${e(nm(d.name))}</u><br>${d.items.filter(Boolean).map(t=>'· '+e(t)).join('<br>')}</div>`).join(''):'<p class=mute>첫 라운드예요. 자유롭게 적어봐!</p>'}
 const timerCard=l=>`<div class=card><p class=mute style="text-align:center">${l}</p><div class=timer id=t>--:--</div><div class=bar><b id=pb style="width:100%"></b></div></div>`;
 const hostBtns=()=>isHost()?'<div class=row><button class=ghost id=pl>+1분</button><button class=pk id=sk>다음 단계로 건너뛰기</button></div>':'';
 const hostWire=()=>{if(isHost()){$('#pl').onclick=()=>updateDoc(rref(),{roundEnd:R.roundEnd+60000});$('#sk').onclick=advance}};
-function write(){const w=owner();if(!w)return page('<div class=card>참가자만 볼 수 있어요</div>');curWrite={round:R.round,sheet:w.o.uid,sid:SID()};const s=R.settings;
+function write(){vs=0;const w=owner();if(!w)return page(`${top()}<div class=card>이번 회의 참가자가 아니에요. 끝날 때까지 기다려줘.</div>`);curWrite={round:R.round,sheet:w.o.uid,sid:SID()};const s=R.settings;
 page(`${top()}${timerCard(`라운드 ${R.round} / ${s.rounds} · 대화 금지 🤫`)}
 <div class=card><h3>${R.round===1?'내 시트':'받은 시트 — 읽고 보완하거나 새 아이디어를 더해줘'}</h3><div id=prev>${prevHtml()}</div><br>${Array.from({length:s.count},(_,i)=>`<textarea class=idea rows=2 placeholder="아이디어 ${i+1}"></textarea>`).join('')}</div>${hostBtns()}`);
 const mine=ideas.find(d=>d.id===SID()+'_'+R.round+'_'+U.uid);if(mine)$$('.idea').forEach((t,i)=>t.value=mine.items[i]||'');
 $$('.idea').forEach(t=>t.oninput=()=>{clearTimeout(saveT);saveT=setTimeout(saveDom,400)});hostWire();online()}
 function saveDom(){if(!curWrite)return;const items=$$('.idea').map(v=>v.value.trim());if(!items.length)return;setDoc(doc(db,'rooms',code,'ideas',curWrite.sid+'_'+curWrite.round+'_'+U.uid),{sid:curWrite.sid,sheet:curWrite.sheet,author:U.uid,name:U.displayName||'이름없음',round:curWrite.round,items})}
-function writeBs(){curWrite=null;page(`${top()}${timerCard('생성 단계 · 비판 없이, 많이, 자유롭게')}
+function writeBs(){vs=0;curWrite=null;page(`${top()}${timerCard('생성 단계 · 비판 없이, 많이, 자유롭게')}
 <div class=card>${PR.map(p=>`<span class=chip>${p}</span>`).join('')}<br><br><div class=row><input id=bi placeholder="아이디어를 적고 엔터" style="margin:0"><button class=pri id=bb style="flex:none">추가</button></div></div>
 <div class=card><h3>쏟아진 아이디어</h3><div id=feed></div></div>${hostBtns()}`);
 const add=()=>{const v=$('#bi').value.trim();if(!v)return;addDoc(col('ideas'),{kind:'bs',sid:SID(),uid:U.uid,name:U.displayName||'이름없음',text:v,t:Date.now(),votes:[]});$('#bi').value='';$('#bi').focus()};
 $('#bb').onclick=add;$('#bi').onkeydown=k=>{if(k.key==='Enter')add()};hostWire();feed();online()}
-function feed(){const f=$('#feed');if(!f)return;const l=ideas.filter(d=>d.kind==='bs'&&(d.sid||1)===SID()).sort((a,b)=>b.t-a.t);f.innerHTML=l.map(d=>`<div class=prev><u>${e(nm(d.name))}</u> ${e(d.text)}</div>`).join('')||'<p class=mute>첫 아이디어를 던져봐!</p>'}
+function feed(){const f=$('#feed');if(!f)return;const l=ideas.filter(d=>d.kind==='bs'&&sd(d)===SID()).sort((a,b)=>b.t-a.t);f.innerHTML=l.map(d=>`<div class=prev><u>${e(nm(d.name))}</u> ${e(d.text)}</div>`).join('')||'<p class=mute>첫 아이디어를 던져봐!</p>'}
 function advance(){if(!R||R.status!=='write')return;(R.mode==='bs'||R.round>=R.settings.rounds)?updateDoc(rref(),{status:'discuss'}):updateDoc(rref(),{round:R.round+1,roundEnd:Date.now()+R.settings.min*60000})}
 function tick(){if(!R||R.status!=='write'||!$('#t'))return;const left=Math.max(0,Math.ceil((R.roundEnd-Date.now())/1000));$('#t').textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');$('#pb').style.width=Math.min(100,left/(R.settings.min*60)*100)+'%';
 const k=SID()+'_'+R.round;if(left===0&&!fired[k]){fired[k]=1;saveDom();if(isHost()){const r=R.round;setTimeout(()=>{if(R.round===r&&R.status==='write')advance()},1800)}}}
 
-/* 토론 */
-function discuss(){curWrite=null;const h=isHost();page(`${top()}<div class=tabs><button data-t=ideas>${R.mode==='bs'?'분류·투표':'아이디어'}</button><button data-t=board>보드</button><button data-t=chat>채팅</button><button data-t=team>팀</button></div><div id=sel></div><div id=pane></div>
-<div class=row style="margin-top:14px"><button class=ghost id=lv>홈으로</button><button class=ghost id=xt>회의 나가기</button>${h&&R.status==='discuss'?'<button class=pk id=fin>회의 종료</button>':''}${h?'<button class=ghost id=rs>다시 시작</button>':''}</div>`);
-$$('.tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;pane()});$('#lv').onclick=leave;$('#xt').onclick=exitRoom;if($('#fin'))$('#fin').onclick=()=>updateDoc(rref(),{status:'done'});
-if(h)$('#rs').onclick=()=>{if(confirm((SID()+1)+'차 회의를 새로 시작할까? 이전 기록은 그대로 남아.'))updateDoc(rref(),{status:'lobby',sid:SID()+1,round:0})};pane()}
-function sheets(S){return R.members.map((m,i)=>({title:`${i+1}번 시트${R.settings.anon?'':' ('+m.name+')'}`,list:ideas.filter(d=>!d.kind&&d.sheet===m.uid&&(d.sid||1)===S).sort((a,b)=>a.round-b.round)}))}
-const bsList=S=>ideas.filter(d=>d.kind==='bs'&&(d.sid||1)===S).sort((a,b)=>(b.votes||[]).length-(a.votes||[]).length||a.t-b.t);
+/* 팀 화면 */
+function hub(){curWrite=null;page(`${top()}<div class=tabs><button data-t=ideas>회의</button><button data-t=board>보드</button><button data-t=chat>채팅</button><button data-t=team>팀</button></div><div id=sel></div><div id=pane></div>`);
+$$('.tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;pane()});pane()}
+function sheets(S){return R.members.map((m,i)=>({title:`${i+1}번 시트${R.settings.anon?'':' ('+m.name+')'}`,list:ideas.filter(d=>!d.kind&&d.sheet===m.uid&&sd(d)===S).sort((a,b)=>a.round-b.round)}))}
+const bsList=S=>ideas.filter(d=>d.kind==='bs'&&sd(d)===S).sort((a,b)=>(b.votes||[]).length-(a.votes||[]).length||a.t-b.t);
 function bsItem(d,h){return`<div class="prev ${d.pick?'pick':''}"><span class=ac><button class=ghost data-g="${d.id}">분류</button><button class=ghost data-v="${d.id}">♥ ${(d.votes||[]).length}</button>${h?`<button class=ghost data-p="${d.id}">${d.pick?'★':'☆'}</button>`:''}</span><u>${e(nm(d.name))}</u> ${e(d.text)}</div>`}
-function pane(){$$('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));const p=$('#pane');if(!p)return;const S=VS();
-const sl=$('#sel');if(sl){sl.innerHTML=SID()>1?`<select id=vs>${Array.from({length:SID()},(_,i)=>`<option value=${i+1} ${i+1===S?'selected':''}>${i+1}차 회의${i+1===SID()?' (현재)':''}</option>`).join('')}</select>`:'';if($('#vs'))$('#vs').onchange=ev=>{vs=+ev.target.value;pane()}}
-if(tab==='ideas'){let h='';
-if(R.mode==='bs'){const l=bsList(S),hh=isHost(),pk=l.filter(d=>d.pick);
+function recordHtml(S){if(!S)return'<div class=card><p class=mute>아직 진행한 회의가 없어요.</p></div>';let h='';
+if(mdOf(S)==='bs'){const l=bsList(S),hh=isHost(),pk=l.filter(d=>d.pick);
 h+=pk.length?`<div class=card><h3>★ 최종 채택 (${pk.length})</h3>${pk.map(d=>bsItem(d,hh)).join('')}</div>`:'';
 const gs=[...new Set(l.map(d=>d.g||''))].sort((a,b)=>(!a)-(!b)||a.localeCompare(b));
 h+=`<div class=card><h3>아이디어 ${l.length}개 · '분류'로 묶고, ♥로 투표${hh?', ☆로 채택':''}</h3>${gs.map(g=>`<h3 style="margin-top:10px">${g?'📁 '+e(g):'미분류'}</h3>${l.filter(d=>(d.g||'')===g).map(d=>bsItem(d,hh)).join('')}`).join('')||'<p class=mute>기록 없음</p>'}</div>`}
 else h+=sheets(S).map(s=>`<div class=card><h3>${e(s.title)}</h3>${s.list.map(d=>`<div class=prev><u>R${d.round} ${e(nm(d.name))}</u><br>${d.items.filter(Boolean).map(t=>'· '+e(t)).join('<br>')||'-'}</div>`).join('')||'<p class=mute>기록 없음</p>'}</div>`).join('');
-p.innerHTML=h;
+return h}
+function pane(){$$('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));const p=$('#pane');if(!p)return;const S=VS();
+const sl=$('#sel');if(sl){sl.innerHTML=SID()>1&&(tab==='ideas'||tab==='board')?`<select id=vs>${Array.from({length:SID()},(_,i)=>`<option value=${i+1} ${i+1===S?'selected':''}>${i+1}차 · ${e((R.meets&&R.meets[i+1]&&R.meets[i+1].title)||'')}${i+1===SID()?' (최근)':''}</option>`).join('')}</select>`:'';if($('#vs'))$('#vs').onchange=ev=>{vs=+ev.target.value;pane()}}
+if(tab==='ideas'){let h=R.status==='lobby'?meetCard():'<div class=card><p class=mute>토론·정리 단계예요. 분류·투표·채택을 하고, 보드·채팅도 써보세요.</p></div>';
+if(S&&(R.meets&&R.meets[S]))h+=`<h3 style="margin:6px 2px">${S}차 회의 · ${e(R.meets[S].title)} <span class=chip>${mName(mdOf(S))}</span></h3>`;
+h+=recordHtml(S);p.innerHTML=h;wireMeet();
 const ref=id=>doc(db,'rooms',code,'ideas',id);
 $$('[data-v]').forEach(b=>b.onclick=()=>{const d=ideas.find(x=>x.id===b.dataset.v),has=(d.votes||[]).includes(U.uid);updateDoc(ref(d.id),{votes:has?arrayRemove(U.uid):arrayUnion(U.uid)})});
 $$('[data-g]').forEach(b=>b.onclick=()=>{const d=ideas.find(x=>x.id===b.dataset.g),v=prompt('분류 이름 (비우면 해제)',d.g||'');if(v!==null)updateDoc(ref(d.id),{g:v.trim()})});
 $$('[data-p]').forEach(b=>b.onclick=()=>{const d=ideas.find(x=>x.id===b.dataset.p);updateDoc(ref(d.id),{pick:!d.pick})})}
-else if(tab==='chat'){p.innerHTML=`<div class=chat id=cl></div><div class=row><input id=ci placeholder="메시지 입력" style="margin:0"><button class=pri id=cs style="flex:none">보내기</button></div>`;chatList();const send=()=>{const v=$('#ci').value.trim();if(!v)return;addDoc(col('messages'),{uid:U.uid,name:U.displayName||'이름없음',text:v,t:Date.now(),sid:SID()});$('#ci').value=''};$('#cs').onclick=send;$('#ci').onkeydown=k=>{if(k.key==='Enter')send()}}
+else if(tab==='chat'){p.innerHTML=`<div class=chat id=cl></div><div class=row><input id=ci placeholder="메시지 입력" style="margin:0"><button class=ghost id=cf style="flex:none">📎</button><button class=pri id=cs style="flex:none">보내기</button></div><input type=file id=cfi hidden><p class=mute style="margin-top:6px">파일은 700KB까지 올릴 수 있어요.</p>`;chatList();
+const send=(file)=>{const v=$('#ci').value.trim();if(!v&&!file)return;const o={uid:U.uid,name:U.displayName||'이름없음',text:v,t:Date.now()};if(file)o.file=file;addDoc(col('messages'),o);$('#ci').value=''};
+$('#cs').onclick=()=>send();$('#ci').onkeydown=k=>{if(k.key==='Enter')send()};
+$('#cf').onclick=()=>$('#cfi').click();
+$('#cfi').onchange=ev=>{const f=ev.target.files[0];if(!f)return;if(f.size>700000)return alert('700KB 넘는 파일은 올릴 수 없어');const rd=new FileReader();rd.onload=()=>send({name:f.name,size:f.size,mime:f.type||'',data:rd.result});rd.readAsDataURL(f)}}
 else if(tab==='team')team(p);
 else boardPane(p)}
+function chatList(){const c=$('#cl');if(!c)return;c.innerHTML=chats.map(m=>`<p><b>${e(m.name)}</b> ${e(m.text||'')}${m.file?fileHtml(m.file):''}</p>`).join('');c.scrollTop=c.scrollHeight}
+const fileHtml=f=>f.mime&&f.mime.startsWith('image/')?`<br><img src="${f.data}" style="max-width:60%;border-radius:8px">`:`<br><a href="${f.data}" download="${e(f.name)}" style="color:var(--pd);font-weight:700">📎 ${e(f.name)} (${Math.round(f.size/1024)}KB)</a>`;
 
 /* 보드 */
-function boardPane(p){const bl=boards.filter(b=>(b.sid||1)===VS());if(bsel!=='wb'&&!bl.some(b=>b.id===bsel))bsel='wb';
-p.innerHTML=`<div class=subs><button data-b=wb class="${bsel==='wb'?'on':''}">🎨 화이트보드</button>${bl.map(b=>`<button data-b="${b.id}" class="${bsel===b.id?'on':''}">${b.type==='table'?'▦':'📎'} ${e(b.title)}</button>`).join('')}<button class=pk id=ad>+ 추가</button></div><div id=bpane></div>`;
-$$('[data-b]').forEach(b=>b.onclick=()=>{bsel=b.dataset.b;boardPane(p)});$('#ad').onclick=addMenu;
-const bp=$('#bpane');if(bsel==='wb')wb(bp);else{const b=bl.find(x=>x.id===bsel);b.type==='table'?tableV(b,bp):fileV(b,bp)}}
-function addMenu(){const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class=card><h2>보드에 추가</h2><h3>표 만들기</h3><input id=at placeholder="표 이름"><div class=row><input id=ar type=number value=4 min=1 max=30 placeholder="행"><input id=ac type=number value=3 min=1 max=10 placeholder="열"></div><p class=mute style="margin-bottom:8px">행 · 열 (첫 줄은 제목 줄)</p><button class=pri id=a1 style="width:100%">표 추가</button><br><br><h3>파일 올리기</h3><p class=mute style="margin-bottom:8px">PPT·PDF·이미지 등 700KB까지</p><input id=af type=file><div class=err id=ae></div><button id=a2 style="width:100%">업로드</button></div>`;document.body.append(m);m.onclick=ev=>{if(ev.target===m)m.remove()};
-$('#a1').onclick=async()=>{const r=Math.min(30,Math.max(1,+$('#ar').value||4)),c=Math.min(10,Math.max(1,+$('#ac').value||3));vs=0;const rf=await addDoc(col('boards'),{type:'table',title:$('#at').value.trim()||'표',cols:c,cells:Array(r*c).fill(''),sid:SID(),u:U.uid,t:Date.now()});bsel=rf.id;m.remove()};
-$('#a2').onclick=()=>{const f=$('#af').files[0];if(!f)return $('#ae').textContent='파일을 골라줘';if(f.size>700000)return $('#ae').textContent='700KB 넘는 파일은 올릴 수 없어';const rd=new FileReader();rd.onload=async()=>{vs=0;const rf=await addDoc(col('boards'),{type:'file',title:f.name,name:f.name,size:f.size,mime:f.type||'',data:rd.result,sid:SID(),u:U.uid,t:Date.now()});bsel=rf.id;m.remove()};rd.readAsDataURL(f)}}
-function delBtn(b){return(isHost()||b.u===U.uid)?`<button class=ghost id=bdel>삭제</button>`:''}
-function wireDel(b){const x=$('#bdel');if(x)x.onclick=()=>{if(confirm('삭제할까?')){bsel='wb';deleteDoc(doc(db,'rooms',code,'boards',b.id))}}}
-function tableV(b,el){const n=b.cols,rows=b.cells.length/n,sv=c=>updateDoc(doc(db,'rooms',code,'boards',b.id),c);
-el.innerHTML=`<div class=tw><table>${Array.from({length:rows},(_,r)=>`<tr>${Array.from({length:n},(_,c)=>`<td><input data-i=${r*n+c} value="${e(b.cells[r*n+c])}"></td>`).join('')}</tr>`).join('')}</table></div><div class="row nf"><button class=ghost id=tr>+ 행</button><button class=ghost id=tc>+ 열</button>${delBtn(b)}</div>`;
-$$('td input').forEach(i=>i.onchange=()=>{const c=[...b.cells];c[+i.dataset.i]=i.value;sv({cells:c})});
-$('#tr').onclick=()=>sv({cells:b.cells.concat(Array(n).fill(''))});
-$('#tc').onclick=()=>{const c=[];for(let r=0;r<rows;r++){c.push(...b.cells.slice(r*n,r*n+n),'')}sv({cols:n+1,cells:c})};wireDel(b)}
-function fileV(b,el){const img=b.mime.startsWith('image/'),pdf=b.mime==='application/pdf';
-el.innerHTML=`<div class=card style="margin:0"><b>${e(b.name)}</b> <span class=mute>${Math.round(b.size/1024)}KB</span><br><br>${img?`<img src="${b.data}" style="max-width:100%;border-radius:10px;margin-bottom:10px">`:''}${pdf?'<iframe id=pf style="width:100%;height:60vh;border:2px solid var(--line);border-radius:12px;margin-bottom:10px"></iframe>':''}${img||pdf?'':'<p class=mute style="margin-bottom:10px">PPT·문서 파일은 브라우저에서 미리보기가 안 돼요. 다운로드해서 열어줘.</p>'}<div class="row nf"><a href="${b.data}" download="${e(b.name)}"><button class=pri>다운로드</button></a>${delBtn(b)}</div></div>`;
-if(pdf)fetch(b.data).then(r=>r.blob()).then(bl=>{const f=$('#pf');if(f)f.src=URL.createObjectURL(bl)});wireDel(b)}
-function wb(bp){const cs=['#76628f','#d48aa8','#2d2a32','#8e8996'];
-bp.innerHTML=`<div class=pal>${cs.map(c=>`<span class=c data-c=${c} style="background:${c}"></span>`).join('')}<button class=ghost id=er>지우개</button><button class=ghost data-m=draw>✏️ 그리기</button><button class=ghost data-m=pan>✋ 화면이동</button><button class=ghost data-m=img>🖼 사진이동</button><button class=ghost id=zo>－</button><button class=ghost id=zi>＋</button><button class=ghost id=ph>사진 추가</button><input type=file id=fl accept="image/*" hidden>${isHost()?'<button class=ghost id=cl2>전체 지우기</button>':''}</div><div id=wrap><div id=bd style="width:${z*100}%"><div id=il></div><canvas id=cv width=1200 height=750></canvas></div></div><p class=mute>사진 위에도 그릴 수 있어요. 사진 이동은 '🖼 사진이동' 모드에서 드래그, 더블클릭(더블탭)으로 삭제. 확대 후 ✋로 바꿔 화면을 밀어요.</p>`;
+function boardPane(p){if(!VS())return p.innerHTML='<div class=card><p class=mute>회의를 시작하면 이 회의의 화이트보드가 열려요.</p></div>';
+const cs=['#76628f','#d48aa8','#2d2a32','#8e8996'];
+p.innerHTML=`<div class=pal>${cs.map(c=>`<span class=c data-c=${c} style="background:${c}"></span>`).join('')}<button class=ghost id=er>지우개</button><button class=ghost data-m=draw>✏️ 그리기</button><button class=ghost data-m=pan>✋ 화면이동</button><button class=ghost data-m=img>🖼 사진이동</button><button class=ghost id=zo>－</button><button class=ghost id=zi>＋</button><button class=ghost id=ph>사진 추가</button><input type=file id=fl accept="image/*" hidden>${isHost()?'<button class=ghost id=cl2>전체 지우기</button>':''}</div><div id=wrap><div id=bd style="width:${z*100}%"><div id=il></div><canvas id=cv width=1200 height=750></canvas></div></div><p class=mute>사진 위에도 그릴 수 있어요. 사진을 옮기려면 '🖼 사진이동' 모드에서 드래그, 더블클릭(더블탭)으로 삭제. 확대 후 ✋로 바꿔 화면을 밀어요.</p>`;
 $$('.pal span.c').forEach(s=>s.onclick=()=>{color=s.dataset.c;md='draw';applyMd()});$('#er').onclick=()=>{color='erase';md='draw';applyMd()};
 $$('[data-m]').forEach(b=>b.onclick=()=>{md=b.dataset.m;applyMd()});
 const zz=d=>{z=Math.max(1,Math.min(4,z+d));$('#bd').style.width=z*100+'%'};$('#zi').onclick=()=>zz(.5);$('#zo').onclick=()=>zz(-.5);
 $('#ph').onclick=()=>$('#fl').click();$('#fl').onchange=addImg;
-if($('#cl2'))$('#cl2').onclick=async()=>{if(!confirm('이 회차 그림을 모두 지울까?'))return;(await getDocs(col('strokes'))).forEach(d=>{if((d.data().sid||1)===VS())deleteDoc(d.ref)})};
+if($('#cl2'))$('#cl2').onclick=async()=>{if(!confirm('이 회의 그림을 모두 지울까?'))return;(await getDocs(col('strokes'))).forEach(d=>{if(sd(d.data())===VS())deleteDoc(d.ref)})};
 board();imgR();applyMd()}
 function applyMd(){const bd=$('#bd');if(!bd)return;bd.classList.toggle('mi',md==='img');$('#cv').style.pointerEvents=md==='draw'?'auto':'none';$$('[data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m===md));$('#er').classList.toggle('on',md==='draw'&&color==='erase')}
-function addImg(ev){const f=ev.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{const k=Math.min(1,500/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);addDoc(col('imgs'),{src:c.toDataURL('image/jpeg',.7),x:.1,y:.1,w:.25,sid:SID()})};im.src=URL.createObjectURL(f)}
-function imgR(){const l=$('#il');if(!l)return;l.innerHTML=imgs.filter(d=>(d.sid||1)===VS()).map(d=>`<img data-id="${d.id}" src="${d.src}" style="left:${d.x*100}%;top:${d.y*100}%;width:${d.w*100}%">`).join('');
+function addImg(ev){const f=ev.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{const k=Math.min(1,500/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);addDoc(col('imgs'),{src:c.toDataURL('image/jpeg',.7),x:.1,y:.1,w:.25,sid:VS()})};im.src=URL.createObjectURL(f)}
+function imgR(){const l=$('#il');if(!l)return;l.innerHTML=imgs.filter(d=>sd(d)===VS()).map(d=>`<img data-id="${d.id}" src="${d.src}" style="left:${d.x*100}%;top:${d.y*100}%;width:${d.w*100}%">`).join('');
 $$('#il img').forEach(m=>{const d=imgs.find(x=>x.id===m.dataset.id);m.ondblclick=()=>deleteDoc(doc(db,'rooms',code,'imgs',d.id));
 m.onpointerdown=ev=>{if(md!=='img')return;ev.preventDefault();m.setPointerCapture(ev.pointerId);const r=$('#bd').getBoundingClientRect(),gx=(ev.clientX-r.left)/r.width-d.x,gy=(ev.clientY-r.top)/r.height-d.y;let mv=false;
 m.onpointermove=e2=>{mv=true;const r2=$('#bd').getBoundingClientRect();m.style.left=Math.max(0,(e2.clientX-r2.left)/r2.width-gx)*100+'%';m.style.top=Math.max(0,(e2.clientY-r2.top)/r2.height-gy)*100+'%'};
 m.onpointerup=()=>{m.onpointermove=m.onpointerup=null;if(mv)updateDoc(doc(db,'rooms',code,'imgs',d.id),{x:parseFloat(m.style.left)/100,y:parseFloat(m.style.top)/100})}}})}
+function draw1(x,s){if(s.pts.length<2)return;const er=s.c==='erase';x.globalCompositeOperation=er?'destination-out':'source-over';x.beginPath();x.strokeStyle=er?'#000':s.c;x.lineWidth=s.w;x.lineCap=x.lineJoin='round';for(let i=0;i<s.pts.length;i+=2)x[i?'lineTo':'moveTo'](s.pts[i]*1200,s.pts[i+1]*750);x.stroke();x.globalCompositeOperation='source-over'}
+function redraw(){const c=$('#cv');if(!c)return;const x=c.getContext('2d');x.clearRect(0,0,1200,750);strokes.filter(s=>sd(s)===VS()).forEach(s=>draw1(x,s));if(cur)draw1(x,cur)}
+function board(){const c=$('#cv');redraw();const pos=ev=>{const r=c.getBoundingClientRect();return[+((ev.clientX-r.left)/r.width).toFixed(4),+((ev.clientY-r.top)/r.height).toFixed(4)]};
+c.onpointerdown=ev=>{ev.preventDefault();c.setPointerCapture(ev.pointerId);cur={pts:pos(ev),c:color,w:(color==='erase'?28:4)/z}};
+c.onpointermove=ev=>{if(!cur)return;ev.preventDefault();cur.pts.push(...pos(ev));redraw()};
+const up=()=>{if(!cur)return;const s=cur;cur=null;if(s.pts.length<4)s.pts.push(s.pts[0]+.001,s.pts[1]);addDoc(col('strokes'),{...s,t:Date.now(),u:U.uid,sid:VS()})};
+c.onpointerup=up;c.onpointercancel=up}
+
+/* 팀 탭: 역할·업무 */
 function team(p){const h=isHost();
-p.innerHTML=`<div class=card><h3>역할 분배</h3>${R.members.map((m,i)=>`<div class=row style="margin-bottom:6px">${chip(m)}${h?`<input data-r=${i} value="${e(m.role||'')}" placeholder="역할(예: 발표, 기록)" style="margin:0">`:`<span class=mute>${e(m.role||'역할 미정')}</span>`}</div>`).join('')}</div>
+p.innerHTML=`<div class=card><h3>역할 분배 · 팀 코드 ${code}</h3>${R.members.map((m,i)=>`<div class=row style="margin-bottom:6px">${chip(m)}${h?`<input data-r=${i} value="${e(m.role||'')}" placeholder="역할(예: 발표, 기록)" style="margin:0">`:`<span class=mute>${e(m.role||'역할 미정')}</span>`}</div>`).join('')}</div>
 ${h?`<div class=card><h3>업무 지시</h3><select id=ta>${R.members.map(m=>`<option value=${m.uid}>${e(m.name)}</option>`).join('')}</select><input id=tt2 placeholder="할 일"><input id=td type=date><button class=pri id=tb style="width:100%">지시하기</button></div>`:''}
 <div class=card><h3>업무 목록</h3>${tasks.map(t=>{const mn=t.to===U.uid;return`<div class=task><input type=checkbox data-k=${t.id} ${t.done?'checked':''} ${mn||h?'':'disabled'}><div class="${t.done?'done':''}"><b>${e(t.title)}</b><div class=mute>${e(t.toName)}${t.due?' · 기한 '+t.due:''}${mn?' · 내 업무':''}</div></div>${h?`<button class=ghost data-del=${t.id}>삭제</button>`:''}</div>`}).join('')||'<p class=mute>아직 지시된 업무가 없어요.</p>'}</div>`;
 $$('[data-r]').forEach(i=>i.onchange=()=>{const ms=R.members.map((m,k)=>k==i.dataset.r?{...m,role:i.value}:m);updateDoc(rref(),{members:ms})});
 $$('[data-k]').forEach(c=>c.onchange=()=>updateDoc(doc(db,'rooms',code,'tasks',c.dataset.k),{done:c.checked}));
 $$('[data-del]').forEach(b=>b.onclick=()=>{if(confirm('이 업무를 삭제할까?'))deleteDoc(doc(db,'rooms',code,'tasks',b.dataset.del))});
 if(h)$('#tb').onclick=()=>{const t=$('#tt2').value.trim();if(!t)return;const m=R.members.find(x=>x.uid===$('#ta').value);addDoc(col('tasks'),{title:t,to:m.uid,toName:m.name,due:$('#td').value,done:false,t:Date.now()})}}
-function chatList(){const c=$('#cl');if(!c)return;c.innerHTML=chats.filter(m=>(m.sid||1)===VS()).map(m=>`<p><b>${e(m.name)}</b> ${e(m.text)}</p>`).join('');c.scrollTop=c.scrollHeight}
-function draw1(x,s){if(s.pts.length<2)return;const er=s.c==='erase';x.globalCompositeOperation=er?'destination-out':'source-over';x.beginPath();x.strokeStyle=er?'#000':s.c;x.lineWidth=s.w;x.lineCap=x.lineJoin='round';for(let i=0;i<s.pts.length;i+=2)x[i?'lineTo':'moveTo'](s.pts[i]*1200,s.pts[i+1]*750);x.stroke();x.globalCompositeOperation='source-over'}
-function redraw(){const c=$('#cv');if(!c)return;const x=c.getContext('2d');x.clearRect(0,0,1200,750);strokes.filter(s=>(s.sid||1)===VS()).forEach(s=>draw1(x,s));if(cur)draw1(x,cur)}
-function board(){const c=$('#cv');redraw();const pos=ev=>{const r=c.getBoundingClientRect();return[+((ev.clientX-r.left)/r.width).toFixed(4),+((ev.clientY-r.top)/r.height).toFixed(4)]};
-c.onpointerdown=ev=>{ev.preventDefault();c.setPointerCapture(ev.pointerId);cur={pts:pos(ev),c:color,w:(color==='erase'?28:4)/z}};
-c.onpointermove=ev=>{if(!cur)return;ev.preventDefault();cur.pts.push(...pos(ev));redraw()};
-const up=()=>{if(!cur)return;const s=cur;cur=null;if(s.pts.length<4)s.pts.push(s.pts[0]+.001,s.pts[1]);addDoc(col('strokes'),{...s,t:Date.now(),u:U.uid,sid:SID()})};
-c.onpointerup=up;c.onpointercancel=up}
 
-function download(){const L=[`# ${R.title}`,`방 코드: ${code}`,`모드: ${R.mode==='bs'?'브레인스토밍':'브레인라이팅'}`,`날짜: ${new Date(R.created).toLocaleString('ko-KR')}`,`참가자: ${R.members.map(m=>R.settings.anon?'익명':m.name+(m.role?'('+m.role+')':'')).join(', ')}`,''];
-for(let S=1;S<=SID();S++){L.push(`## ${S}차 회의`,'','### 아이디어','');
-if(R.mode==='bs'){let g=null;bsList(S).sort((a,b)=>(a.g||'~').localeCompare(b.g||'~')).forEach(d=>{if(d.g!==g){g=d.g;L.push(`[${g||'미분류'}]`)}L.push(`- ${d.pick?'★ ':''}${nm(d.name)}: ${d.text} (♥${(d.votes||[]).length})`)})}
-else sheets(S).forEach(s=>{L.push('#### '+s.title);s.list.forEach(d=>{L.push(`[라운드 ${d.round}] ${nm(d.name)}`);d.items.filter(Boolean).forEach(t=>L.push('  - '+t))});L.push('')});
-boards.filter(b=>(b.sid||1)===S).forEach(b=>{L.push('',`### ${b.type==='table'?'표':'파일'}: ${b.title}`);if(b.type==='table'){for(let r=0;r<b.cells.length/b.cols;r++)L.push(b.cells.slice(r*b.cols,r*b.cols+b.cols).join(' | '))}else L.push(`(첨부파일 ${b.name}, ${Math.round(b.size/1024)}KB)`)});
-L.push('','### 채팅','');chats.filter(m=>(m.sid||1)===S).forEach(m=>L.push(`${new Date(m.t).toLocaleTimeString('ko-KR')} ${m.name}: ${m.text}`));L.push('')}
+function download(){const L=[`# ${R.team||R.title}`,`팀 코드: ${code}`,`생성: ${new Date(R.created).toLocaleString('ko-KR')}`,`참가자: ${R.members.map(m=>R.settings.anon?'익명':m.name+(m.role?'('+m.role+')':'')).join(', ')}`,''];
+for(let S=1;S<=SID();S++){const mt=R.meets&&R.meets[S];L.push(`## ${S}차 회의: ${mt?mt.title:''} (${mName(mdOf(S))})`,'');
+if(mdOf(S)==='bs'){let g=null;bsList(S).sort((a,b)=>(a.g||'~').localeCompare(b.g||'~')).forEach(d=>{if(d.g!==g){g=d.g;L.push(`[${g||'미분류'}]`)}L.push(`- ${d.pick?'★ ':''}${nm(d.name)}: ${d.text} (♥${(d.votes||[]).length})`)})}
+else sheets(S).forEach(s=>{L.push('### '+s.title);s.list.forEach(d=>{L.push(`[라운드 ${d.round}] ${nm(d.name)}`);d.items.filter(Boolean).forEach(t=>L.push('  - '+t))});L.push('')});
+L.push('')}
 L.push('## 업무','');tasks.forEach(t=>L.push(`- [${t.done?'x':' '}] ${t.title} → ${t.toName}${t.due?' (기한 '+t.due+')':''}`));
+L.push('','## 채팅','');chats.forEach(m=>L.push(`${new Date(m.t).toLocaleString('ko-KR')} ${m.name}: ${m.text||''}${m.file?' (파일: '+m.file.name+')':''}`));
 const b=new Blob(['\uFEFF'+L.join('\r\n')],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`회의기록_${code}.txt`;document.body.append(a);a.click();a.remove()}
 </script></body></html>
